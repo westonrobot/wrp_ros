@@ -1,0 +1,1 @@
+LightControlType state
