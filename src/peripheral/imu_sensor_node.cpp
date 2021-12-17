@@ -17,39 +17,41 @@ ImuSensorNode::ImuSensorNode() {
 
   pub_ = nh_.advertise<sensor_msgs::Imu>("imu_sensor/imu", 1);
 
-  pub_timer_ =
-      nh_.createTimer(ros::Duration(publish_interval_ / 1000.0),
-                      std::bind(&ImuSensorNode::PublishCallback, this));
+  // Callback publisher implementation
+  sensor_->SetDataReceivedCallback(
+      std::bind(&ImuSensorNode::PublishCallback, this, std::placeholders::_1));
+
+  // Periodic timer publisher implementation
+  // pub_timer_ =
+  //     nh_.createTimer(ros::Duration(publish_interval_ / 1000.0),
+  //                     std::bind(&ImuSensorNode::PublishCallback, this));
 }
 
 ImuSensorNode::~ImuSensorNode() { ros::shutdown(); }
 
-void ImuSensorNode::PublishCallback() {
-  if (sensor_->IsOkay()) {
-    auto data = sensor_->GetLastData();
-    imu_data_.header.stamp = ros::Time::now();
-    imu_data_.header.frame_id = frame_id_;
-    imu_data_.orientation.x = data.orientation.x;
-    imu_data_.orientation.y = data.orientation.y;
-    imu_data_.orientation.z = data.orientation.z;
-    imu_data_.orientation.w = data.orientation.w;
-    for (int i = 0; i < 9; ++i) {
-      imu_data_.orientation_covariance[i] = data.orientation_covariance[i];
-    }
-    imu_data_.angular_velocity.x = data.angular_velocity.x;
-    imu_data_.angular_velocity.y = data.angular_velocity.y;
-    imu_data_.angular_velocity.z = data.angular_velocity.z;
-    for (int i = 0; i < 9; ++i) {
-      imu_data_.angular_velocity_covariance[i] =
-          data.angular_velocity_covariance[i];
-    }
-    imu_data_.linear_acceleration.x = data.linear_acceleration.x;
-    imu_data_.linear_acceleration.y = data.linear_acceleration.y;
-    imu_data_.linear_acceleration.z = data.linear_acceleration.z;
-    for (int i = 0; i < 9; ++i) {
-      imu_data_.linear_acceleration_covariance[i] =
-          data.linear_acceleration_covariance[i];
-    }
+void ImuSensorNode::PublishCallback(const ImuData& data) {
+  imu_data_.header.stamp = ros::Time::now();
+  imu_data_.header.frame_id = frame_id_;
+  imu_data_.orientation.x = data.orientation.x;
+  imu_data_.orientation.y = data.orientation.y;
+  imu_data_.orientation.z = data.orientation.z;
+  imu_data_.orientation.w = data.orientation.w;
+  for (int i = 0; i < 9; ++i) {
+    imu_data_.orientation_covariance[i] = data.orientation_covariance[i];
+  }
+  imu_data_.angular_velocity.x = data.angular_velocity.x;
+  imu_data_.angular_velocity.y = data.angular_velocity.y;
+  imu_data_.angular_velocity.z = data.angular_velocity.z;
+  for (int i = 0; i < 9; ++i) {
+    imu_data_.angular_velocity_covariance[i] =
+        data.angular_velocity_covariance[i];
+  }
+  imu_data_.linear_acceleration.x = data.linear_acceleration.x;
+  imu_data_.linear_acceleration.y = data.linear_acceleration.y;
+  imu_data_.linear_acceleration.z = data.linear_acceleration.z;
+  for (int i = 0; i < 9; ++i) {
+    imu_data_.linear_acceleration_covariance[i] =
+        data.linear_acceleration_covariance[i];
 
     pub_.publish(imu_data_);
   }

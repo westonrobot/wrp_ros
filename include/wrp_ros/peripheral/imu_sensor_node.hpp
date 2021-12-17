@@ -12,7 +12,7 @@ class ImuSensorNode {
   ~ImuSensorNode();
 
  private:
-  void PublishCallback();
+  void PublishCallback(const ImuData& data);
   bool ReadParameters();
 
  private:

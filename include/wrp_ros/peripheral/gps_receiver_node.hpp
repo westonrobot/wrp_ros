@@ -12,7 +12,7 @@ class GpsReceiverNode {
   ~GpsReceiverNode();
 
  private:
-  void PublishCallback();
+  void PublishCallback(const NavSatFix& gps_fix);
   bool ReadParameters();
 
  private:
