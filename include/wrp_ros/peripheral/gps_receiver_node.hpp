@@ -1,5 +1,6 @@
 #include <memory>
 #include <ros/ros.h>
+#include <sensor_msgs/NavSatFix.h>
 
 #include "wrp_sdk/peripheral/gps_receiver.hpp"
 
@@ -18,6 +19,7 @@ class GpsReceiverNode {
   std::shared_ptr<GpsReceiver> receiver_;
   ros::Publisher pub_;
   ros::Timer pub_timer_;
+  sensor_msgs::NavSatFix sat_fix_;
   std::string device_path_ = "/dev/ttyUSB0";
   int publish_interval_ = 500;
   int baud_rate_ = 115200;
