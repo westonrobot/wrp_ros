@@ -1,0 +1,6 @@
+gps_receiver_node:
+  ros__parameters:
+    device_path: "/dev/ttyUSB0" # Path to receiver port
+    publish_interval: 500 # publish interval in milliseconds
+    baud_rate: 115200 # baud rate
+    frame_id: "gps"

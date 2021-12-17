@@ -121,6 +121,11 @@ add_dependencies(wrp_sdk_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORT
 add_executable(mobile_base_node src/mobile_base_node.cpp)
 target_link_libraries(mobile_base_node wrp_sdk_ros ${catkin_LIBRARIES})
 
+# peripheral device support
+add_executable(gps_receiver_node src/peripheral/gps_receiver_node.cpp)
+target_link_libraries(gps_receiver_node westonrobot::wrp_sdk westonrobot::wrp_zbus ${catkin_LIBRARIES})
+add_dependencies(gps_receiver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 #############
 ## Install ##
 #############
