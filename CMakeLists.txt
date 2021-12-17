@@ -126,6 +126,10 @@ add_executable(gps_receiver_node src/peripheral/gps_receiver_node.cpp)
 target_link_libraries(gps_receiver_node westonrobot::wrp_sdk westonrobot::wrp_zbus ${catkin_LIBRARIES})
 add_dependencies(gps_receiver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+add_executable(imu_sensor_node src/peripheral/imu_sensor_node.cpp)
+target_link_libraries(imu_sensor_node westonrobot::wrp_sdk westonrobot::wrp_zbus ${catkin_LIBRARIES})
+add_dependencies(imu_sensor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 #############
 ## Install ##
 #############
