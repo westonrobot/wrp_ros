@@ -13,7 +13,10 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   roscpp
   sensor_msgs
+  geometry_msgs
   std_msgs
+  tf2
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -34,12 +37,14 @@ find_package(wrp_zbus REQUIRED)
 add_message_files(
     FILES
     ActuatorState.msg
+    ActuatorStateArray.msg
     AssistedModeSetCommand.msg
     DriverState.msg
     LightControlType.msg
     MotionCommand.msg
     MotionResetCommand.msg
     MotionState.msg
+    MotorState.msg
     RangeData.msg
     RangeDataType.msg
     RcState.msg
@@ -113,9 +118,8 @@ add_library(wrp_sdk_ros STATIC src/mobile_base_ros.cpp)
 target_link_libraries(wrp_sdk_ros ${catkin_LIBRARIES} westonrobot::wrp_sdk westonrobot::wrp_zbus)
 add_dependencies(wrp_sdk_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-# add_executable(scout_base_node src/scout_base_node.cpp)
-# target_link_libraries(scout_base_node scout_messenger ${catkin_LIBRARIES})
-
+add_executable(mobile_base_node src/mobile_base_node.cpp)
+target_link_libraries(mobile_base_node wrp_sdk_ros ${catkin_LIBRARIES})
 
 #############
 ## Install ##

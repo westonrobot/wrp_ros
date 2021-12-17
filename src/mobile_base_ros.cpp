@@ -1,9 +1,254 @@
-/* 
+/*
  * mobile_base.cpp
- * 
+ *
  * Created on: Dec 16, 2021 16:13
- * Description: 
- * 
+ * Description:
+ *
  * Copyright (c) 2021 Weston Robot Pte. Ltd.
- */ 
+ */
 
+#include "wrp_ros/mobile_base_ros.hpp"
+
+#include "wrp_sdk/mobile_base/westonrobot/mobile_base.hpp"
+#include "wrp_sdk/mobile_base/agilex/agilex_base_v2_adapter.hpp"
+
+#ifdef WITH_UNITREE_SUPPORT
+#include "unitree_a1_adapter/a1_legged_base.hpp"
+#endif
+
+#include <nav_msgs/Odometry.h>
+#include <tf/transform_broadcaster.h>
+
+#include "wrp_ros/SystemState.h"
+#include "wrp_ros/MotionState.h"
+#include "wrp_ros/ActuatorStateArray.h"
+
+namespace westonrobot {
+MobileBaseRos::MobileBaseRos(ros::NodeHandle* nh, const std::string& can,
+                             const RobotBaseType& robot_base)
+    : nh_(nh), can_device_(can) {
+  switch (robot_base) {
+    case RobotBaseType::kWeston: {
+      robot_ = std::make_shared<MobileBase>();
+      break;
+    }
+    case RobotBaseType::kVbot: {
+      robot_ = std::make_shared<MobileBase>(true);
+      break;
+    }
+#ifdef WITH_UNITREE_SUPPORT
+    case RobotBaseType::kA1: {
+      robot_ = std::make_shared<A1LeggedBase>();
+      break;
+    }
+#endif
+    case RobotBaseType::kAgilex: {
+      robot_ = std::make_shared<AgilexBaseV2Adapter>();
+      break;
+    }
+  }
+}
+
+void MobileBaseRos::SetBaseFrame(std::string base_frame) {
+  base_frame_ = base_frame;
+}
+
+void MobileBaseRos::SetOdomFrame(std::string odom_frame) {
+  odom_frame_ = odom_frame;
+}
+
+void MobileBaseRos::SetOdomTopicName(std::string odom_topic) {
+  odom_topic_name_ = odom_topic;
+}
+
+void MobileBaseRos::SetupSubscription() {
+  // odometry publisher
+  odom_publisher_ = nh_->advertise<nav_msgs::Odometry>(odom_topic_name_, 50);
+
+  system_state_publisher_ =
+      nh_->advertise<wrp_ros::SystemState>("/system_state", 10);
+  motion_state_publisher_ =
+      nh_->advertise<wrp_ros::MotionState>("/motion_state", 10);
+  actuator_state_publisher_ =
+      nh_->advertise<wrp_ros::ActuatorStateArray>("/actuator_state", 10);
+
+  // cmd subscriber
+  motion_cmd_subscriber_ = nh_->subscribe<geometry_msgs::Twist>(
+      "/cmd_vel", 5, &MobileBaseRos::MotionCmdCallback, this);
+  assisted_mode_set_cmd_subscriber_ =
+      nh_->subscribe<wrp_ros::AssistedModeSetCommand>(
+          "/assisted_mode_set", 5, &MobileBaseRos::AssistedModeSetCmdCallback,
+          this);
+}
+
+void MobileBaseRos::SetupService() {
+  access_control_service_ = nh_->advertiseService(
+      "access_control", &MobileBaseRos::HandleAccessControl, this);
+}
+
+void MobileBaseRos::PublishRobotStateToROS() {
+  auto system_state = robot_->GetSystemState();
+  auto motion_state = robot_->GetMotionState();
+  auto actuator_state = robot_->GetActuatorState();
+
+  // system state
+  wrp_ros::SystemState system_state_msg;
+  system_state_msg.rc_connected = system_state.rc_connected;
+  system_state_msg.error_code = static_cast<uint32_t>(system_state.error_code);
+  system_state_msg.operational_state =
+      static_cast<uint32_t>(system_state.operational_state);
+  system_state_msg.control_state =
+      static_cast<uint32_t>(system_state.control_state);
+
+  system_state_publisher_.publish(system_state_msg);
+
+  // motion state
+  wrp_ros::MotionState motion_state_msg;
+  motion_state_msg.desired_linear.x = motion_state.desired_linear.x;
+  motion_state_msg.desired_linear.y = motion_state.desired_linear.y;
+  motion_state_msg.desired_linear.z = motion_state.desired_linear.z;
+  motion_state_msg.desired_angular.x = motion_state.desired_angular.x;
+  motion_state_msg.desired_angular.y = motion_state.desired_angular.y;
+  motion_state_msg.desired_angular.z = motion_state.desired_angular.z;
+
+  motion_state_msg.source = static_cast<uint32_t>(motion_state.source);
+  motion_state_msg.collision_detected = motion_state.collision_detected;
+  motion_state_msg.assisted_mode_enabled = motion_state.assisted_mode_enabled;
+
+  motion_state_publisher_.publish(motion_state_msg);
+
+  // actuator state
+  wrp_ros::ActuatorStateArray actuator_state_msg;
+  for (int i = 0; i < actuator_state.size(); ++i) {
+    wrp_ros::ActuatorState actuator_msg;
+    actuator_msg.id = actuator_state[i].id;
+    actuator_state_msg.states.push_back(actuator_msg);
+  }
+  actuator_state_publisher_.publish(actuator_state_msg);
+}
+
+void MobileBaseRos::PublishSensorDataToROS() {
+  // TODO
+}
+
+void MobileBaseRos::PublishWheelOdometry() {
+  // TODO calculate odometry according to robot type
+  auto robot_odom = robot_->GetOdometry();
+
+  auto current_time = ros::Time::now();
+  float dt = (current_time - last_time_).toSec();
+  last_time_ = current_time;
+
+  // if last_time is too old, reset calculation
+  if (dt > 10 * loop_period_) return;
+
+  auto linear_speed = robot_odom.linear.x;
+  auto angular_speed = robot_odom.angular.z;
+
+  double d_x = linear_speed * std::cos(theta_) * dt;
+  double d_y = linear_speed * std::sin(theta_) * dt;
+  double d_theta = angular_speed * dt;
+
+  position_x_ += d_x;
+  position_y_ += d_y;
+  theta_ += d_theta;
+
+  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
+
+  // publish tf transformation
+  geometry_msgs::TransformStamped tf_msg;
+  tf_msg.header.stamp = current_time;
+  tf_msg.header.frame_id = odom_frame_;
+  tf_msg.child_frame_id = base_frame_;
+
+  tf_msg.transform.translation.x = position_x_;
+  tf_msg.transform.translation.y = position_y_;
+  tf_msg.transform.translation.z = 0.0;
+  tf_msg.transform.rotation = odom_quat;
+
+  tf_broadcaster_.sendTransform(tf_msg);
+
+  // publish odometry and tf messages
+  nav_msgs::Odometry odom_msg;
+  odom_msg.header.stamp = current_time;
+  odom_msg.header.frame_id = odom_frame_;
+  odom_msg.child_frame_id = base_frame_;
+
+  odom_msg.pose.pose.position.x = position_x_;
+  odom_msg.pose.pose.position.y = position_y_;
+  odom_msg.pose.pose.position.z = 0.0;
+  odom_msg.pose.pose.orientation = odom_quat;
+
+  odom_msg.twist.twist.linear.x = linear_speed;
+  odom_msg.twist.twist.linear.y = 0.0;
+  odom_msg.twist.twist.angular.z = angular_speed;
+
+  odom_publisher_.publish(odom_msg);
+}
+
+void MobileBaseRos::MotionCmdCallback(
+    const geometry_msgs::Twist::ConstPtr& msg) {
+  MotionCommand cmd;
+
+  cmd.linear.x = msg->linear.x;
+  cmd.linear.y = msg->linear.y;
+  cmd.linear.z = msg->linear.z;
+  cmd.angular.x = msg->angular.x;
+  cmd.angular.y = msg->angular.y;
+  cmd.angular.z = msg->angular.z;
+
+  if (robot_->SdkHasControlToken()) {
+    robot_->SetMotionCommand(cmd);
+  }
+  //   ROS_INFO("CMD received:%f, %f", msg->linear.x, msg->angular.z);
+}
+
+void MobileBaseRos::AssistedModeSetCmdCallback(
+    const wrp_ros::AssistedModeSetCommand::ConstPtr& msg) {
+  AssistedModeSetCommand cmd;
+  cmd.enable = msg->enable;
+  robot_->SetAssistedMode(cmd);
+}
+
+bool MobileBaseRos::HandleAccessControl(wrp_ros::AccessControl::Request& req,
+                                        wrp_ros::AccessControl::Response& res) {
+  if (req.action_type ==
+      wrp_ros::AccessControl::Request::ACTION_TYPE_REQUEST_CONTROL) {
+    auto result = robot_->RequestControl();
+    res.result_code = static_cast<uint32_t>(result);
+  } else if (req.action_type ==
+             wrp_ros::AccessControl::Request::ACTION_TYPE_RENOUNCE_CONTROL) {
+    auto result = robot_->RenounceControl();
+    res.result_code = static_cast<uint32_t>(result);
+  }
+  return true;
+}
+
+void MobileBaseRos::SetAutoReconnect(bool enable) { auto_reconnect_ = enable; }
+
+void MobileBaseRos::Run(double loop_hz) {
+  if (!robot_->Connect(can_device_)) {
+    ROS_ERROR("Failed to connect to robot through port: %s",
+              can_device_.c_str());
+    return;
+  }
+
+  SetupSubscription();
+  SetupService();
+
+  loop_period_ = 1.0 / loop_hz;
+  ros::Rate rate(loop_hz);
+  while (ros::ok()) {
+    if (auto_reconnect_ && !robot_->SdkHasControlToken()) {
+      robot_->RequestControl(10);
+    }
+
+    PublishRobotStateToROS();
+    PublishSensorDataToROS();
+    PublishWheelOdometry();
+
+    ros::spinOnce();
+    rate.sleep();
+  }
+}
+}  // namespace westonrobot
