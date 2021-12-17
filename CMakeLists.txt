@@ -34,28 +34,23 @@ find_package(wrp_zbus REQUIRED)
 add_message_files(
     FILES
     ActuatorState.msg
-    BumperState.msg
-    LightCommand.msg
+    AssistedModeSetCommand.msg
+    DriverState.msg
     LightControlType.msg
-    LightState.msg
     MotionCommand.msg
-    MotionControlType.msg
+    MotionResetCommand.msg
     MotionState.msg
     RangeData.msg
     RangeDataType.msg
-    RCState.msg
+    RcState.msg
     SystemState.msg
 )
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  ActuatorStateCheck.srv
-  LightStateCheck.srv
-  RcStateCheck.srv
-  RenounceControl.srv
-  RequestControl.srv
-  SystemStateCheck.srv
+  AccessControl.srv
+  LightControl.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -151,11 +146,11 @@ install(TARGETS wrp_sdk_ros
 )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES

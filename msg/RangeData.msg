@@ -1,6 +1,6 @@
-int8 TOF = 0
-int8 ULTRASONIC = 1
-int8 BUMPER = 2
+int8 RANGE_SENSOR_TYPE_TOF = 0
+int8 RANGE_SENSOR_TYPE_ULTRASONIC = 1
+int8 RANGE_SENSOR_TYPE_BUMPER = 2
 
 int8 type
 RangeDataType[8] data

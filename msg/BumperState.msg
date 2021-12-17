@@ -1,6 +1,0 @@
-# date can be set as:
-# 0 BUMPER_STATE_NORMAL
-# 1 BUMPER_STATE_ACTIVATED
-# -1 BUMPER_STATE_ABSENT
-
-bool[8] state

@@ -1,8 +1,8 @@
-int8 BREATH = 0
-int8 CONST_OFF = 1
-int8 CONST_ON = 2
-int8 CUSTOM = 3
-int8 ENQUIRY = 4
+int8 LIGHT_MODE_BREATH = 0
+int8 LIGHT_MODE_CONST_OFF = 1
+int8 LIGHT_MODE_CONST_ON = 2
+int8 LIGHT_MODE_CUSTOM = 3
+int8 LIGHT_MODE_ENQUIRY = 4
 
 int32 mode
 uint32 intensity
