@@ -9,7 +9,7 @@
 
 #include <ros/ros.h>
 
-#include "wrp_ros/mobile_base_ros.hpp"
+#include "wrp_ros/mobile_base/mobile_base_ros.hpp"
 
 using namespace westonrobot;
 
