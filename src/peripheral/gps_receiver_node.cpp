@@ -1,9 +1,18 @@
+/*
+ * gps_receiver_node.cpp
+ *
+ * Created on: Dec 20, 2021 08:47
+ * Description:
+ *
+ * Copyright (c) 2021 Weston Robot Pte. Ltd.
+ */
+
 #include "wrp_ros/peripheral/gps_receiver_node.hpp"
 
 namespace westonrobot {
 namespace wrp_ros {
 GpsReceiverNode::GpsReceiverNode() {
-  if (!this->ReadParameters()) {
+  if (!ReadParameters()) {
     ROS_ERROR("Could not load parameters");
     ros::shutdown();
   }
@@ -11,15 +20,16 @@ GpsReceiverNode::GpsReceiverNode() {
   receiver_ = std::make_shared<GpsReceiver>();
 
   if (!receiver_->Connect(device_path_, baud_rate_)) {
-    ROS_ERROR("Failed to setup gps receiver");
+    ROS_ERROR("Failed to connect to GPS port: %s@%d", device_path_.c_str(),
+              baud_rate_);
     ros::shutdown();
   }
 
   pub_ = nh_.advertise<sensor_msgs::NavSatFix>("gps_receiver/navsat_fix", 1);
 
   // Callback publisher implementation
-  receiver_->SetDataReceivedCallback(
-      std::bind(&GpsReceiverNode::PublishCallback, this, std::placeholders::_1));
+  receiver_->SetDataReceivedCallback(std::bind(
+      &GpsReceiverNode::PublishCallback, this, std::placeholders::_1));
 
   // Periodic timer publisher implementation
   // pub_timer_ =
@@ -28,6 +38,19 @@ GpsReceiverNode::GpsReceiverNode() {
 }
 
 GpsReceiverNode::~GpsReceiverNode() { ros::shutdown(); }
+
+bool GpsReceiverNode::ReadParameters() {
+  nh_.getParam("device_path", device_path_);
+  nh_.getParam("publish_interval", publish_interval_);
+  nh_.getParam("baud_rate", baud_rate_);
+  nh_.getParam("frame_id", frame_id_);
+  ROS_INFO(
+      "Successfully loaded the following parameters: \nDevice path: "
+      "%s\nPublish interval: "
+      "%d\nBaud rate: %d\nFrame id: %s",
+      device_path_.c_str(), publish_interval_, baud_rate_, frame_id_.c_str());
+  return true;
+}
 
 void GpsReceiverNode::PublishCallback(const NavSatFix& gps_fix) {
   sat_fix_.header.stamp = ros::Time::now();
@@ -41,19 +64,6 @@ void GpsReceiverNode::PublishCallback(const NavSatFix& gps_fix) {
     sat_fix_.position_covariance[i] = gps_fix.position_covariance[i];
   }
   pub_.publish(sat_fix_);
-}
-
-bool GpsReceiverNode::ReadParameters() {
-  nh_.getParam("device_path", device_path_);
-  nh_.getParam("publish_interval", publish_interval_);
-  nh_.getParam("baud_rate", baud_rate_);
-  nh_.getParam("frame_id", frame_id_);
-  ROS_INFO(
-      "Successfully loaded the following parameters: \nDevice path: "
-      "%s\nPublish interval: "
-      "%d\nBaud rate: %d\nFrame id: %s",
-      device_path_.c_str(), publish_interval_, baud_rate_, frame_id_.c_str());
-  return true;
 }
 }  // namespace wrp_ros
 }  // namespace westonrobot

@@ -1,9 +1,18 @@
+/*
+ * imu_sensor_node.cpp
+ *
+ * Created on: Dec 20, 2021 08:47
+ * Description:
+ *
+ * Copyright (c) 2021 Weston Robot Pte. Ltd.
+ */
+
 #include "wrp_ros/peripheral/imu_sensor_node.hpp"
 
 namespace westonrobot {
 namespace wrp_ros {
 ImuSensorNode::ImuSensorNode() {
-  if (!this->ReadParameters()) {
+  if (!ReadParameters()) {
     ROS_ERROR("Could not load parameters");
     ros::shutdown();
   }
@@ -11,7 +20,8 @@ ImuSensorNode::ImuSensorNode() {
   sensor_ = std::make_shared<ImuSensor>();
 
   if (!sensor_->Connect(device_path_, baud_rate_)) {
-    ROS_ERROR("Failed to setup imu sensor");
+    ROS_ERROR("Failed to connect to IMU sensor: %s@%d", device_path_.c_str(),
+              baud_rate_);
     ros::shutdown();
   }
 

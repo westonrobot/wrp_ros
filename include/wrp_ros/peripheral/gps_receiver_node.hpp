@@ -1,3 +1,15 @@
+/*
+ * gps_receiver_node.hpp
+ *
+ * Created on: Dec 20, 2021 08:45
+ * Description:
+ *
+ * Copyright (c) 2021 Weston Robot Pte. Ltd.
+ */
+
+#ifndef GPS_RECEIVER_NODE_HPP
+#define GPS_RECEIVER_NODE_HPP
+
 #include <memory>
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
@@ -28,3 +40,5 @@ class GpsReceiverNode {
 };
 }  // namespace wrp_ros
 }  // namespace westonrobot
+
+#endif /* GPS_RECEIVER_NODE_HPP */

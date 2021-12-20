@@ -1,3 +1,15 @@
+/* 
+ * imu_sensor_node.hpp
+ * 
+ * Created on: Dec 20, 2021 08:45
+ * Description: 
+ * 
+ * Copyright (c) 2021 Weston Robot Pte. Ltd.
+ */ 
+
+#ifndef IMU_SENSOR_NODE_HPP
+#define IMU_SENSOR_NODE_HPP
+
 #include <memory>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
@@ -28,3 +40,5 @@ class ImuSensorNode {
 };
 }  // namespace wrp_ros
 }  // namespace westonrobot
+
+#endif /* IMU_SENSOR_NODE_HPP */
