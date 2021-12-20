@@ -7,7 +7,7 @@
  * Copyright (c) 2021 Weston Robot Pte. Ltd.
  */
 
-#include "wrp_ros/mobile_base_ros.hpp"
+#include "wrp_ros/mobile_base/mobile_base_ros.hpp"
 
 #include "wrp_sdk/mobile_base/westonrobot/mobile_base.hpp"
 #include "wrp_sdk/mobile_base/agilex/agilex_base_v2_adapter.hpp"
