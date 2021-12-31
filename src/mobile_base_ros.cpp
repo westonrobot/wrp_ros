@@ -239,13 +239,13 @@ void MobileBaseRos::Run(double loop_hz) {
   loop_period_ = 1.0 / loop_hz;
   ros::Rate rate(loop_hz);
   while (ros::ok()) {
-    // if (auto_reconnect_ && !robot_->SdkHasControlToken()) {
-    //   auto ret = robot_->RequestControl(100);
-    //   if (ret != HandshakeReturnCode::kControlAcquired) {
-    //     std::cout << "Failed to gain control token, error code: "
-    //               << static_cast<int>(ret) << std::endl;
-    //   }
-    // }
+    if (auto_reconnect_ && !robot_->SdkHasControlToken()) {
+      auto ret = robot_->RequestControl();
+      if (ret != HandshakeReturnCode::kControlAcquired) {
+        std::cout << "Failed to gain control token, error code: "
+                  << static_cast<int>(ret) << std::endl;
+      }
+    }
 
     PublishRobotStateToROS();
     PublishSensorDataToROS();

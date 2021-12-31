@@ -4,7 +4,7 @@
         * robot_type: weston/agilex/vbot/unitree_a1
     -->
     <arg name="port_name" default="can0" />
-    <arg name="robot_type" default="agilex" />
+    <arg name="robot_type" default="weston" />
     <arg name="base_frame" default="base_link" />
     <arg name="odom_frame" default="odom" />
     <arg name="odom_topic_name" default="odom" />
