@@ -9,7 +9,7 @@ ROS wrappers around wrp_sdk peripheral drivers.
 ### imu_sensor_node
 | Published Topic   | Type                  | Description                  |
 | ----------------- | --------------------- | ---------------------------- |
-| `/imu_sensor/imu` | sensor_msgs::msg::Imu | Outputs the IMU Sensor data. |
+| `/imu` | sensor_msgs::Imu | Outputs the IMU Sensor data. |
 
 | Parameter     | Type | Description                                                                                 |
 | ------------- | ---- | ------------------------------------------------------------------------------------------- |
@@ -21,7 +21,7 @@ ROS wrappers around wrp_sdk peripheral drivers.
 ### gps_receiver_node
 | Published Topic            | Type                        | Description                                |
 | -------------------------- | --------------------------- | ------------------------------------------ |
-| `/gps_receiver/navsat_fix` | sensor_msgs::msg::NavSatFix | Outputs the navigation satellite fix data. |
+| `/fix` | sensor_msgs::NavSatFix | Outputs the navigation satellite fix data. |
 
 | Parameter     | Type | Description                                                                                                             |
 | ------------- | ---- | ----------------------------------------------------------------------------------------------------------------------- |
