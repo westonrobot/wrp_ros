@@ -3,17 +3,19 @@
         Supported robot types:         
         * robot_type: weston/agilex/vbot/unitree_a1
     -->
-    <arg name="port_name" default="can0" />
+    <arg name="can_device" default="can0" />
     <arg name="robot_type" default="weston" />
     <arg name="base_frame" default="base_link" />
     <arg name="odom_frame" default="odom" />
     <arg name="odom_topic_name" default="odom" />
+    <arg name="auto_reconnect" default="true" />
 
     <node name="mobile_base_node" pkg="wrp_ros" type="mobile_base_node" output="screen">
-        <param name="port_name" type="string" value="$(arg port_name)" />
+        <param name="can_device" type="string" value="$(arg can_device)" />
         <param name="robot_type" type="string" value="$(arg robot_type)" />
         <param name="base_frame" type="string" value="$(arg base_frame)" />
         <param name="odom_frame" type="string" value="$(arg odom_frame)" />
         <param name="odom_topic_name" type="string" value="$(arg odom_topic_name)" />
+        <param name="auto_reconnect" type="bool" value="$(arg auto_reconnect)" />
     </node>
 </launch>

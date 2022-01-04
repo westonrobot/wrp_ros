@@ -16,7 +16,7 @@ using namespace westonrobot;
 int main(int argc, char **argv) {
   // setup ROS node
   ros::init(argc, argv, "mobile_base_node");
-  ros::NodeHandle node(""), private_node("~");
+  ros::NodeHandle node("~");
 
   MobileBaseRos base(&node);
 
