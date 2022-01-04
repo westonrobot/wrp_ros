@@ -1,0 +1,12 @@
+uint8  MOTION_RESET_COMMAND_TYPE_WHEEL = 0
+uint8  MOTION_RESET_COMMAND_TYPE_ODOMETRY = 1
+
+# request
+uint8 type
+---
+
+uint8 MOTION_RESET_SUCCCESS = 0
+uint8 MOTION_RESET_FAILURE = 1
+
+# response
+uint8 result_code

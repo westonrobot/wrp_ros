@@ -38,11 +38,9 @@ add_message_files(
     FILES
     ActuatorState.msg
     ActuatorStateArray.msg
-    AssistedModeSetCommand.msg
     DriverState.msg
     LightControlType.msg
     MotionCommand.msg
-    MotionResetCommand.msg
     MotionState.msg
     MotorState.msg
     RangeData.msg
@@ -56,6 +54,8 @@ add_service_files(
   FILES
   AccessControl.srv
   LightControl.srv
+  AssistedModeControl.srv
+  MotionReset.srv
 )
 
 ## Generate actions in the 'action' folder
