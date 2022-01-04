@@ -22,71 +22,104 @@
 #include "wrp_ros/SystemState.h"
 #include "wrp_ros/MotionState.h"
 #include "wrp_ros/ActuatorStateArray.h"
+#include "wrp_ros/RangeData.h"
 
 namespace westonrobot {
-MobileBaseRos::MobileBaseRos(ros::NodeHandle* nh, const std::string& can,
-                             const RobotBaseType& robot_base)
-    : nh_(nh), can_device_(can) {
-  switch (robot_base) {
-    case RobotBaseType::kWeston: {
-      robot_ = std::make_shared<MobileBase>();
-      break;
-    }
-    case RobotBaseType::kVbot: {
-      robot_ = std::make_shared<MobileBase>(true);
-      break;
-    }
-#ifdef WITH_UNITREE_SUPPORT
-    case RobotBaseType::kA1: {
-      robot_ = std::make_shared<A1LeggedBase>();
-      break;
-    }
-#endif
-    case RobotBaseType::kAgilex: {
-      robot_ = std::make_shared<AgilexBaseV2Adapter>();
-      break;
-    }
+MobileBaseRos::MobileBaseRos(ros::NodeHandle* nh) : nh_(nh) {
+  if (!MobileBaseRos::ReadParameters()) {
+    ROS_ERROR("Could not load parameters");
+    ros::shutdown();
   }
+
+  if (!MobileBaseRos::SetupRobot()) {
+    ROS_ERROR("Failed to setup robot");
+    ros::shutdown();
+  }
+
+  SetupSubscription();
+  SetupService();
 }
 
-void MobileBaseRos::SetBaseFrame(std::string base_frame) {
-  base_frame_ = base_frame;
+bool MobileBaseRos::ReadParameters() {
+  nh_->getParam("can_device", can_device_);
+  nh_->getParam("robot_type", robot_type_);
+  nh_->getParam("base_frame", base_frame_);
+  nh_->getParam("odom_frame", odom_frame_);
+  nh_->getParam("odom_topic_name", odom_topic_name_);
+  nh_->getParam("auto_reconnect", auto_reconnect_);
+
+  ROS_INFO(
+      "Successfully loaded the following parameters: \ncan_device: "
+      "%s\nrobot_type: "
+      "%s\nbase_frame: %s\nodom_frame: %s\nodom_topic_name: "
+      "%s\nauto_reconnect: %d",
+      can_device_.c_str(), robot_type_.c_str(), base_frame_.c_str(),
+      odom_frame_.c_str(), odom_topic_name_.c_str(), auto_reconnect_);
+  return true;
 }
 
-void MobileBaseRos::SetOdomFrame(std::string odom_frame) {
-  odom_frame_ = odom_frame;
-}
+bool MobileBaseRos::SetupRobot() {
+  // create appropriate adapter
+  if (robot_type_ == "weston") {
+    robot_ = std::make_shared<MobileBase>();
+  } else if (robot_type_ == "agilex") {
+    robot_ = std::make_shared<AgilexBaseV2Adapter>();
+  } else if (robot_type_ == "vbot") {
+    robot_ = std::make_shared<MobileBase>(true);
+  }
+#ifdef WITH_UNITREE_SUPPORT
+  else if (robot_type_ == "unitree_a1"): {
+    robot_ = std::make_shared<A1LeggedBase>();
+  }
+#endif
+  else {
+    ROS_ERROR(
+        "Unknown robot base type\n Supported are \"weston\", "
+        "\"agilex\", \"unitree_a1\" & \"vbot\"");
+    return false;
+  }
 
-void MobileBaseRos::SetOdomTopicName(std::string odom_topic) {
-  odom_topic_name_ = odom_topic;
+  // connect to robot through specified can device
+  if (!robot_->Connect(can_device_)) {
+    ROS_ERROR("Failed to connect to robot through port: %s",
+              can_device_.c_str());
+    return false;
+  }
+
+  return true;
 }
 
 void MobileBaseRos::SetupSubscription() {
-  // odometry publisher
-  odom_publisher_ = nh_->advertise<nav_msgs::Odometry>(odom_topic_name_, 50);
-
+  // publishers
   system_state_publisher_ =
       nh_->advertise<wrp_ros::SystemState>("/system_state", 10);
   motion_state_publisher_ =
       nh_->advertise<wrp_ros::MotionState>("/motion_state", 10);
   actuator_state_publisher_ =
       nh_->advertise<wrp_ros::ActuatorStateArray>("/actuator_state", 10);
+  odom_publisher_ = nh_->advertise<nav_msgs::Odometry>(odom_topic_name_, 50);
+  ultrasonic_data_publisher_ =
+      nh_->advertise<wrp_ros::RangeData>(odom_topic_name_, 50);
+  tof_data_publisher_ =
+      nh_->advertise<wrp_ros::RangeData>(odom_topic_name_, 50);
 
-  // cmd subscriber
+  // subscribers
   motion_cmd_subscriber_ = nh_->subscribe<geometry_msgs::Twist>(
       "/cmd_vel", 5, &MobileBaseRos::MotionCmdCallback, this);
-  assisted_mode_set_cmd_subscriber_ =
-      nh_->subscribe<wrp_ros::AssistedModeSetCommand>(
-          "/assisted_mode_set", 5, &MobileBaseRos::AssistedModeSetCmdCallback,
-          this);
 }
 
 void MobileBaseRos::SetupService() {
   access_control_service_ = nh_->advertiseService(
       "access_control", &MobileBaseRos::HandleAccessControl, this);
+  assisted_mode_control_service_ = nh_->advertiseService(
+      "assisted_mode_control", &MobileBaseRos::HandleAssistedModeControl, this);
+  light_control_service_ = nh_->advertiseService(
+      "light_control", &MobileBaseRos::HandleLightControl, this);
+  motion_reset_service_ = nh_->advertiseService(
+      "motion_reset", &MobileBaseRos::HandleMotionReset, this);
 }
 
-void MobileBaseRos::PublishRobotStateToROS() {
+void MobileBaseRos::PublishRobotState() {
   auto system_state = robot_->GetSystemState();
   auto motion_state = robot_->GetMotionState();
   auto actuator_state = robot_->GetActuatorState();
@@ -127,7 +160,7 @@ void MobileBaseRos::PublishRobotStateToROS() {
   actuator_state_publisher_.publish(actuator_state_msg);
 }
 
-void MobileBaseRos::PublishSensorDataToROS() {
+void MobileBaseRos::PublishSensorData() {
   // TODO
 }
 
@@ -197,17 +230,8 @@ void MobileBaseRos::MotionCmdCallback(
   cmd.angular.y = msg->angular.y;
   cmd.angular.z = msg->angular.z;
 
-  if (robot_->SdkHasControlToken()) {
-    robot_->SetMotionCommand(cmd);
-  }
+  robot_->SetMotionCommand(cmd);
   //   ROS_INFO("CMD received:%f, %f", msg->linear.x, msg->angular.z);
-}
-
-void MobileBaseRos::AssistedModeSetCmdCallback(
-    const wrp_ros::AssistedModeSetCommand::ConstPtr& msg) {
-  AssistedModeSetCommand cmd;
-  cmd.enable = msg->enable;
-  robot_->SetAssistedMode(cmd);
 }
 
 bool MobileBaseRos::HandleAccessControl(wrp_ros::AccessControl::Request& req,
@@ -224,18 +248,56 @@ bool MobileBaseRos::HandleAccessControl(wrp_ros::AccessControl::Request& req,
   return true;
 }
 
+bool MobileBaseRos::HandleAssistedModeControl(
+    wrp_ros::AssistedModeControl::Request& req,
+    wrp_ros::AssistedModeControl::Response& res) {
+  AssistedModeSetCommand cmd;
+  cmd.enable = req.enable;
+  /**ATTN: Should we check for token or change the interface here?
+   * If multiple user attempts to change, each one might have a different
+   * thinking if assisted mode is on or off.
+   */
+  robot_->SetAssistedMode(cmd);
+  res.state = req.enable;
+  return true;
+}
+
+bool MobileBaseRos::HandleLightControl(wrp_ros::LightControl::Request& req,
+                                       wrp_ros::LightControl::Response& res) {
+  LightCommand cmd;
+
+  cmd.id = req.id;
+  cmd.command.mode = static_cast<LightMode>(req.command.mode);
+  cmd.command.intensity = req.command.intensity;
+
+  if (robot_->SdkHasControlToken()) {
+    robot_->SetLightCommand(cmd);
+  }
+  auto light_state = robot_->GetLightState();
+  res.state.mode = static_cast<uint32_t>(light_state.state.mode);
+  res.state.intensity = light_state.state.intensity;
+  return true;
+}
+
+bool MobileBaseRos::HandleMotionReset(wrp_ros::MotionReset::Request& req,
+                                      wrp_ros::MotionReset::Response& res) {
+  MotionResetCommand cmd;
+
+  cmd.type = static_cast<MotionResetCommandType>(req.type);
+
+  if (robot_->SdkHasControlToken()) {
+    robot_->SetMotionResetCommand(cmd);
+    res.result_code = wrp_ros::MotionReset::Response::MOTION_RESET_SUCCCESS;
+  } else {
+    res.result_code = wrp_ros::MotionReset::Response::MOTION_RESET_FAILURE;
+  }
+
+  return true;
+}
+
 void MobileBaseRos::SetAutoReconnect(bool enable) { auto_reconnect_ = enable; }
 
 void MobileBaseRos::Run(double loop_hz) {
-  if (!robot_->Connect(can_device_)) {
-    ROS_ERROR("Failed to connect to robot through port: %s",
-              can_device_.c_str());
-    return;
-  }
-
-  SetupSubscription();
-  SetupService();
-
   loop_period_ = 1.0 / loop_hz;
   ros::Rate rate(loop_hz);
   while (ros::ok()) {
@@ -247,8 +309,8 @@ void MobileBaseRos::Run(double loop_hz) {
       }
     }
 
-    PublishRobotStateToROS();
-    PublishSensorDataToROS();
+    PublishRobotState();
+    PublishSensorData();
     PublishWheelOdometry();
 
     ros::spinOnce();

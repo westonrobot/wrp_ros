@@ -16,25 +16,20 @@
 #include <geometry_msgs/Twist.h>
 #include <tf2_ros/transform_broadcaster.h>
 
-#include "wrp_ros/AssistedModeSetCommand.h"
-#include "wrp_ros/MotionResetCommand.h"
 #include "wrp_ros/MotionCommand.h"
 #include "wrp_ros/AccessControl.h"
+#include "wrp_ros/AssistedModeControl.h"
+#include "wrp_ros/LightControl.h"
+#include "wrp_ros/MotionReset.h"
 
 #include "wrp_sdk/interface/mobile_robot_interface.hpp"
 
 namespace westonrobot {
-enum class RobotBaseType { kWeston, kAgilex, kVbot, kUnitreeA1 };
 
 class MobileBaseRos {
  public:
-  MobileBaseRos(ros::NodeHandle* nh, const std::string& can,
-                const RobotBaseType& robot_base);
+  MobileBaseRos(ros::NodeHandle* nh);
   ~MobileBaseRos() = default;
-
-  void SetBaseFrame(std::string base_frame);
-  void SetOdomFrame(std::string odom_frame);
-  void SetOdomTopicName(std::string odom_topic);
 
   void SetAutoReconnect(bool enable);
 
@@ -54,11 +49,12 @@ class MobileBaseRos {
   ros::Publisher ultrasonic_data_publisher_;
   ros::Publisher tof_data_publisher_;
 
-  ros::Subscriber assisted_mode_set_cmd_subscriber_;
   ros::Subscriber motion_cmd_subscriber_;
 
   ros::ServiceServer access_control_service_;
   ros::ServiceServer light_control_service_;
+  ros::ServiceServer assisted_mode_control_service_;
+  ros::ServiceServer motion_reset_service_;
 
   // internal control
   std::shared_ptr<MobileRobotInterface> robot_ = nullptr;
@@ -66,6 +62,7 @@ class MobileBaseRos {
 
   std::string can_device_ = "can0";
   std::string base_frame_ = "base_link";
+  std::string robot_type_ = "weston";
   std::string odom_frame_ = "odom";
   std::string odom_topic_name_ = "odom";
 
@@ -75,19 +72,25 @@ class MobileBaseRos {
   ros::Time last_time_ = ros::Time::now();
   double loop_period_ = 0.02;  // in seconds
 
+  bool ReadParameters();
+  bool SetupRobot();
   void SetupSubscription();
   void SetupService();
 
-  void PublishRobotStateToROS();
-  void PublishSensorDataToROS();
+  void PublishRobotState();
+  void PublishSensorData();
   void PublishWheelOdometry();
 
   void MotionCmdCallback(const geometry_msgs::Twist::ConstPtr& msg);
-  void AssistedModeSetCmdCallback(
-      const wrp_ros::AssistedModeSetCommand::ConstPtr& msg);
 
   bool HandleAccessControl(wrp_ros::AccessControl::Request& req,
                            wrp_ros::AccessControl::Response& res);
+  bool HandleAssistedModeControl(wrp_ros::AssistedModeControl::Request& req,
+                                 wrp_ros::AssistedModeControl::Response& res);
+  bool HandleLightControl(wrp_ros::LightControl::Request& req,
+                          wrp_ros::LightControl::Response& res);
+  bool HandleMotionReset(wrp_ros::MotionReset::Request& req,
+                         wrp_ros::MotionReset::Response& res);
 };
 }  // namespace westonrobot
 
