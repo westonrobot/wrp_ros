@@ -25,7 +25,7 @@ ImuSensorNode::ImuSensorNode() {
     ros::shutdown();
   }
 
-  pub_ = nh_.advertise<sensor_msgs::Imu>(topic_name_, 1);
+  pub_ = nh_.advertise<sensor_msgs::Imu>("/imu", 1);
 
   // Callback publisher implementation
   sensor_->SetDataReceivedCallback(
@@ -69,18 +69,14 @@ void ImuSensorNode::PublishCallback(const ImuData& data) {
 
 bool ImuSensorNode::ReadParameters() {
   nh_.getParam("device_path", device_path_);
-  nh_.getParam("publish_interval", publish_interval_);
   nh_.getParam("baud_rate", baud_rate_);
 
-  nh_.getParam("topic_name", topic_name_);
   nh_.getParam("frame_id", frame_id_);
 
   ROS_INFO(
       "Successfully loaded the following parameters: \nDevice path: "
-      "%s\nPublish interval: "
-      "%d\nBaud rate: %d\nTopic name: %s\nFrame id: %s",
-      device_path_.c_str(), publish_interval_, baud_rate_, topic_name_.c_str(),
-      frame_id_.c_str());
+      "%s\nBaud rate: %d\nFrame id: %s",
+      device_path_.c_str(), baud_rate_, frame_id_.c_str());
   return true;
 }
 }  // namespace wrp_ros
