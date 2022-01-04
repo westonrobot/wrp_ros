@@ -150,6 +150,13 @@ void MobileBaseRos::PublishRobotState() {
   for (int i = 0; i < actuator_state.size(); ++i) {
     wrp_ros::ActuatorState actuator_msg;
     actuator_msg.id = actuator_state[i].id;
+    actuator_msg.motor.rpm = actuator_state[i].motor.rpm;
+    actuator_msg.motor.current = actuator_state[i].motor.current;
+    actuator_msg.motor.pulse_count = actuator_state[i].motor.pulse_count;
+    actuator_msg.driver.driver_voltage = actuator_state[i].driver.driver_voltage;
+    actuator_msg.driver.driver_temperature = actuator_state[i].driver.driver_temperature;
+    actuator_msg.driver.motor_temperature = actuator_state[i].driver.motor_temperature;
+    actuator_msg.driver.driver_state = actuator_state[i].driver.driver_state;
     actuator_state_msg.states.push_back(actuator_msg);
   }
   actuator_state_publisher_.publish(actuator_state_msg);
