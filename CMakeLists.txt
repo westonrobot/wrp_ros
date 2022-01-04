@@ -22,7 +22,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(wrp_sdk REQUIRED)
-find_package(wrp_zbus REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -102,7 +101,7 @@ catkin_package(
  INCLUDE_DIRS include
  LIBRARIES wrp_ros
  CATKIN_DEPENDS message_generation roscpp sensor_msgs std_msgs
- DEPENDS wrp_zbus wrp_sdk
+ DEPENDS wrp_sdk
 )
 
 ###########
@@ -115,7 +114,7 @@ include_directories(
 )
 
 add_library(wrp_sdk_ros STATIC src/mobile_base_ros.cpp)
-target_link_libraries(wrp_sdk_ros ${catkin_LIBRARIES} westonrobot::wrp_sdk westonrobot::wrp_zbus)
+target_link_libraries(wrp_sdk_ros ${catkin_LIBRARIES} westonrobot::wrp_sdk)
 add_dependencies(wrp_sdk_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(mobile_base_node src/mobile_base_node.cpp)
@@ -123,11 +122,11 @@ target_link_libraries(mobile_base_node wrp_sdk_ros ${catkin_LIBRARIES})
 
 # peripheral device support
 add_executable(gps_receiver_node src/peripheral/gps_receiver_node.cpp)
-target_link_libraries(gps_receiver_node westonrobot::wrp_sdk westonrobot::wrp_zbus ${catkin_LIBRARIES})
+target_link_libraries(gps_receiver_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
 add_dependencies(gps_receiver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(imu_sensor_node src/peripheral/imu_sensor_node.cpp)
-target_link_libraries(imu_sensor_node westonrobot::wrp_sdk westonrobot::wrp_zbus ${catkin_LIBRARIES})
+target_link_libraries(imu_sensor_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
 add_dependencies(imu_sensor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
