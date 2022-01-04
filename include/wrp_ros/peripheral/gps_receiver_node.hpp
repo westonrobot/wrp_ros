@@ -34,10 +34,8 @@ class GpsReceiverNode {
   ros::Timer pub_timer_;
   sensor_msgs::NavSatFix sat_fix_;
   std::string device_path_ = "/dev/ttyUSB0";
-  int publish_interval_ = 500;
   int baud_rate_ = 115200;
 
-  std::string topic_name_ = "fix";
   std::string frame_id_ = "gps_link";
 };
 }  // namespace wrp_ros

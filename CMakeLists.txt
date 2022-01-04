@@ -113,11 +113,11 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(wrp_sdk_ros STATIC src/mobile_base_ros.cpp)
+add_library(wrp_sdk_ros STATIC src/mobile_base/mobile_base_ros.cpp)
 target_link_libraries(wrp_sdk_ros ${catkin_LIBRARIES} westonrobot::wrp_sdk)
 add_dependencies(wrp_sdk_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(mobile_base_node src/mobile_base_node.cpp)
+add_executable(mobile_base_node src/mobile_base/mobile_base_node.cpp)
 target_link_libraries(mobile_base_node wrp_sdk_ros ${catkin_LIBRARIES})
 
 # peripheral device support
