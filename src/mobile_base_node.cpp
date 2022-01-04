@@ -20,8 +20,6 @@ int main(int argc, char **argv) {
 
   MobileBaseRos base(&node);
 
-  base.SetAutoReconnect(true);
-
   base.Run(50);
 
   return 0;

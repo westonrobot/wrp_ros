@@ -45,16 +45,15 @@ bool MobileBaseRos::ReadParameters() {
   nh_->getParam("robot_type", robot_type_);
   nh_->getParam("base_frame", base_frame_);
   nh_->getParam("odom_frame", odom_frame_);
-  nh_->getParam("odom_topic_name", odom_topic_name_);
   nh_->getParam("auto_reconnect", auto_reconnect_);
 
   ROS_INFO(
       "Successfully loaded the following parameters: \ncan_device: "
       "%s\nrobot_type: "
-      "%s\nbase_frame: %s\nodom_frame: %s\nodom_topic_name: "
-      "%s\nauto_reconnect: %d",
+      "%s\nbase_frame: %s\nodom_frame: %s"
+      "\nauto_reconnect: %d",
       can_device_.c_str(), robot_type_.c_str(), base_frame_.c_str(),
-      odom_frame_.c_str(), odom_topic_name_.c_str(), auto_reconnect_);
+      odom_frame_.c_str(), auto_reconnect_);
   return true;
 }
 
@@ -97,11 +96,7 @@ void MobileBaseRos::SetupSubscription() {
       nh_->advertise<wrp_ros::MotionState>("/motion_state", 10);
   actuator_state_publisher_ =
       nh_->advertise<wrp_ros::ActuatorStateArray>("/actuator_state", 10);
-  odom_publisher_ = nh_->advertise<nav_msgs::Odometry>(odom_topic_name_, 50);
-  ultrasonic_data_publisher_ =
-      nh_->advertise<wrp_ros::RangeData>(odom_topic_name_, 50);
-  tof_data_publisher_ =
-      nh_->advertise<wrp_ros::RangeData>(odom_topic_name_, 50);
+  odom_publisher_ = nh_->advertise<nav_msgs::Odometry>("/odom", 50);
 
   // subscribers
   motion_cmd_subscriber_ = nh_->subscribe<geometry_msgs::Twist>(
@@ -301,14 +296,6 @@ void MobileBaseRos::Run(double loop_hz) {
   loop_period_ = 1.0 / loop_hz;
   ros::Rate rate(loop_hz);
   while (ros::ok()) {
-    if (auto_reconnect_ && !robot_->SdkHasControlToken()) {
-      auto ret = robot_->RequestControl();
-      if (ret != HandshakeReturnCode::kControlAcquired) {
-        std::cout << "Failed to gain control token, error code: "
-                  << static_cast<int>(ret) << std::endl;
-      }
-    }
-
     PublishRobotState();
     PublishSensorData();
     PublishWheelOdometry();
