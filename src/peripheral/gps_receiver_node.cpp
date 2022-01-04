@@ -25,7 +25,7 @@ GpsReceiverNode::GpsReceiverNode() {
     ros::shutdown();
   }
 
-  pub_ = nh_.advertise<sensor_msgs::NavSatFix>("gps_receiver/navsat_fix", 1);
+  pub_ = nh_.advertise<sensor_msgs::NavSatFix>("/fix", 1);
 
   // Callback publisher implementation
   receiver_->SetDataReceivedCallback(std::bind(
@@ -41,14 +41,14 @@ GpsReceiverNode::~GpsReceiverNode() { ros::shutdown(); }
 
 bool GpsReceiverNode::ReadParameters() {
   nh_.getParam("device_path", device_path_);
-  nh_.getParam("publish_interval", publish_interval_);
   nh_.getParam("baud_rate", baud_rate_);
+
   nh_.getParam("frame_id", frame_id_);
+
   ROS_INFO(
       "Successfully loaded the following parameters: \nDevice path: "
-      "%s\nPublish interval: "
-      "%d\nBaud rate: %d\nFrame id: %s",
-      device_path_.c_str(), publish_interval_, baud_rate_, frame_id_.c_str());
+      "%s\nBaud rate: %d\nFrame id: %s",
+      device_path_.c_str(), baud_rate_, frame_id_.c_str());
   return true;
 }
 

@@ -1,5 +1,3 @@
-device_path: "/dev/ttyUSB0" # Path to receiver port
-publish_interval: 500 # publish interval in milliseconds
+device_path: "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0" # Path to receiver port
 baud_rate: 115200 # baud rate
-topic_name: "imu"
 frame_id: "imu_link"
