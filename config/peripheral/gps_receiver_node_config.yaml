@@ -1,4 +1,5 @@
-device_path: "/dev/ttyACM0" # Path to receiver port
+device_path: "/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_GNSS_receiver-if00" # Path to receiver port
 publish_interval: 500 # publish interval in milliseconds
 baud_rate: 115200 # baud rate
-frame_id: "gps"
+topic_name: "fix"
+frame_id: "gps_link"

@@ -36,7 +36,9 @@ class GpsReceiverNode {
   std::string device_path_ = "/dev/ttyUSB0";
   int publish_interval_ = 500;
   int baud_rate_ = 115200;
-  std::string frame_id_ = "gps";
+
+  std::string topic_name_ = "fix";
+  std::string frame_id_ = "gps_link";
 };
 }  // namespace wrp_ros
 }  // namespace westonrobot
