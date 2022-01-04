@@ -2,10 +2,43 @@
 
 ## About
 
-This package contains a minimal wrapper around wrp_sdk
+This package contains a minimal wrapper around wrp_sdk.
 More details in the individual src sub-folders
   1. [Peripheral Nodes](./src/peripheral)
   2. [Mobile Base Node](./src/mobile_base)
+
+## Dependencies
+
+1. wrp_sdk: v0.12.0  
+    Follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v0.12.0)
+
+## Setup CAN-To-USB adapter
+ 
+1. Enable gs_usb kernel module
+    ```
+    $ sudo modprobe gs_usb
+    ```
+2. Bringup can device
+   ```
+   $ sudo ip link set can0 up type can bitrate 1000000
+   ```
+3. If no error occured during the previous steps, you should be able to see the can device now by using command
+   ```
+   $ ifconfig -a
+   ```
+4. Install and use can-utils to test the hardware
+    ```
+    $ sudo apt install can-utils
+    ```
+5. Testing command
+    ```
+    # receiving data from can0
+    $ candump can0
+    # send data to can0
+    $ cansend can0 001#1122334455667788
+    ```
+
+Scripts are provided [here](./scripts) for easy setup. You can run "./setup_can2usb.bash" for the first-time setup and run "./bringup_can2usb_1m.bash" to bring up the device each time you unplug and re-plug the adapter.
 
 ## Basic Usage
 
@@ -21,7 +54,7 @@ More details in the individual src sub-folders
     $ source devel/setup.bash
     ```
 
-1. Launch ROS nodes  
+2. Launch ROS nodes  
     **_Change run time parameters by editing the corresponding launch file_**
 
     1. GPS Receiver Node
