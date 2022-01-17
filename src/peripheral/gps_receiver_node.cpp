@@ -10,7 +10,6 @@
 #include "wrp_ros/peripheral/gps_receiver_node.hpp"
 
 namespace westonrobot {
-namespace wrp_ros {
 GpsReceiverNode::GpsReceiverNode() {
   if (!ReadParameters()) {
     ROS_ERROR("Could not load parameters");
@@ -65,13 +64,12 @@ void GpsReceiverNode::PublishCallback(const NavSatFix& gps_fix) {
   }
   pub_.publish(sat_fix_);
 }
-}  // namespace wrp_ros
 }  // namespace westonrobot
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "gps_receiver_node");
   ROS_INFO("gps receiver node running.");
-  westonrobot::wrp_ros::GpsReceiverNode gps;
+  westonrobot::GpsReceiverNode gps;
   ros::spin();
   return 0;
 }

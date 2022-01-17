@@ -17,7 +17,6 @@
 #include "wrp_sdk/peripheral/gps_receiver.hpp"
 
 namespace westonrobot {
-namespace wrp_ros {
 class GpsReceiverNode {
  public:
   GpsReceiverNode();
@@ -38,7 +37,6 @@ class GpsReceiverNode {
 
   std::string frame_id_ = "gps_link";
 };
-}  // namespace wrp_ros
 }  // namespace westonrobot
 
 #endif /* GPS_RECEIVER_NODE_HPP */
