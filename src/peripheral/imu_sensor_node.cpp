@@ -61,9 +61,8 @@ void ImuSensorNode::PublishCallback(const ImuData& data) {
   for (int i = 0; i < 9; ++i) {
     imu_data_.linear_acceleration_covariance[i] =
         data.linear_acceleration_covariance[i];
-
-    pub_.publish(imu_data_);
   }
+  pub_.publish(imu_data_);
 }
 
 bool ImuSensorNode::ReadParameters() {
