@@ -17,7 +17,6 @@
 #include "wrp_sdk/peripheral/imu_sensor.hpp"
 
 namespace westonrobot {
-namespace wrp_ros {
 class ImuSensorNode {
  public:
   ImuSensorNode();
@@ -38,7 +37,6 @@ class ImuSensorNode {
 
   std::string frame_id_ = "imu_link";
 };
-}  // namespace wrp_ros
 }  // namespace westonrobot
 
 #endif /* IMU_SENSOR_NODE_HPP */
