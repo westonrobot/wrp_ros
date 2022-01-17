@@ -10,7 +10,6 @@
 #include "wrp_ros/peripheral/imu_sensor_node.hpp"
 
 namespace westonrobot {
-namespace wrp_ros {
 ImuSensorNode::ImuSensorNode() {
   if (!ReadParameters()) {
     ROS_ERROR("Could not load parameters");
@@ -62,9 +61,8 @@ void ImuSensorNode::PublishCallback(const ImuData& data) {
   for (int i = 0; i < 9; ++i) {
     imu_data_.linear_acceleration_covariance[i] =
         data.linear_acceleration_covariance[i];
-
-    pub_.publish(imu_data_);
   }
+  pub_.publish(imu_data_);
 }
 
 bool ImuSensorNode::ReadParameters() {
@@ -79,13 +77,12 @@ bool ImuSensorNode::ReadParameters() {
       device_path_.c_str(), baud_rate_, frame_id_.c_str());
   return true;
 }
-}  // namespace wrp_ros
 }  // namespace westonrobot
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "imu_sensor_node");
   ROS_INFO("imu sensor node running.");
-  westonrobot::wrp_ros::ImuSensorNode imu;
+  westonrobot::ImuSensorNode imu;
   ros::spin();
   return 0;
 }
