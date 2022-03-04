@@ -9,6 +9,8 @@
 
 #include "wrp_ros/peripheral/imu_sensor_node.hpp"
 
+#include "wrp_sdk/peripheral/imu_sensor_wit.hpp"
+
 namespace westonrobot {
 ImuSensorNode::ImuSensorNode() {
   if (!ReadParameters()) {
@@ -16,7 +18,7 @@ ImuSensorNode::ImuSensorNode() {
     ros::shutdown();
   }
 
-  sensor_ = std::make_shared<ImuSensor>();
+  sensor_ = std::make_shared<ImuSensorWit>();
 
   if (!sensor_->Connect(device_path_, baud_rate_)) {
     ROS_ERROR("Failed to connect to IMU sensor: %s@%d", device_path_.c_str(),
@@ -38,7 +40,7 @@ ImuSensorNode::ImuSensorNode() {
 
 ImuSensorNode::~ImuSensorNode() { ros::shutdown(); }
 
-void ImuSensorNode::PublishCallback(const ImuData& data) {
+void ImuSensorNode::PublishCallback(const ImuMsg& data) {
   imu_data_.header.stamp = ros::Time::now();
   imu_data_.header.frame_id = frame_id_;
   imu_data_.orientation.x = data.orientation.x;
@@ -66,6 +68,7 @@ void ImuSensorNode::PublishCallback(const ImuData& data) {
 }
 
 bool ImuSensorNode::ReadParameters() {
+  nh_.getParam("sensor_model", sensor_model_);
   nh_.getParam("device_path", device_path_);
   nh_.getParam("baud_rate", baud_rate_);
 

@@ -14,7 +14,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
 
-#include "wrp_sdk/peripheral/gps_receiver.hpp"
+#include "wrp_sdk/interface/gps_interface.hpp"
 
 namespace westonrobot {
 class GpsReceiverNode {
@@ -23,19 +23,19 @@ class GpsReceiverNode {
   ~GpsReceiverNode();
 
  private:
-  void PublishCallback(const NavSatFix& gps_fix);
+  void PublishCallback(const NavSatFixMsg& gps_fix);
   bool ReadParameters();
 
  private:
+  std::string device_path_ = "/dev/ttyUSB0";
+  int baud_rate_ = 115200;
+  std::string frame_id_ = "gps_link";
+
   ros::NodeHandle nh_;
-  std::shared_ptr<GpsReceiver> receiver_;
+  std::shared_ptr<GpsInterface> receiver_;
   ros::Publisher pub_;
   ros::Timer pub_timer_;
   sensor_msgs::NavSatFix sat_fix_;
-  std::string device_path_ = "/dev/ttyUSB0";
-  int baud_rate_ = 115200;
-
-  std::string frame_id_ = "gps_link";
 };
 }  // namespace westonrobot
 
