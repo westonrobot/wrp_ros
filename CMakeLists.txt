@@ -129,6 +129,10 @@ add_executable(imu_sensor_node src/peripheral/imu_sensor_node.cpp)
 target_link_libraries(imu_sensor_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
 add_dependencies(imu_sensor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+add_executable(ultrasonic_sensor_node src/peripheral/ultrasonic_sensor_node.cpp)
+target_link_libraries(ultrasonic_sensor_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
+add_dependencies(ultrasonic_sensor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 #############
 ## Install ##
 #############
