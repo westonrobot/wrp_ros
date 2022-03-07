@@ -23,6 +23,12 @@ UltrasonicSensorNode::UltrasonicSensorNode() {
   } else {
   }
 
+  pubs_.resize(8);
+  for (int i = 0; i < 8; ++i) {
+    std::string topic_name = topic_name_ + std::to_string(i);
+    pubs_[i] = nh_.advertise<sensor_msgs::Range>(topic_name, 10);
+  }
+
   sensor_->SetDataReceivedCallback(std::bind(
       &UltrasonicSensorNode::PublishCallback, this, std::placeholders::_1));
 
@@ -32,11 +38,6 @@ UltrasonicSensorNode::UltrasonicSensorNode() {
     ros::shutdown();
   }
 
-  pubs_.resize(8);
-  for (int i = 0; i < 8; ++i) {
-    std::string topic_name = topic_name_ + std::to_string(i);
-    pubs_[i] = nh_.advertise<sensor_msgs::Range>(topic_name, 10);
-  }
 }
 
 UltrasonicSensorNode::~UltrasonicSensorNode() { ros::shutdown(); }
