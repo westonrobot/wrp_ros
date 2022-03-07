@@ -1,0 +1,6 @@
+# sensor model: dyp_a05/w200d
+sensor_model: "dyp_a05"
+device_path: "/dev/ttyUSB0" # Path to receiver port
+baud_rate: 9600 # baud rate
+frame_id: "ultrasonic_link"
+topic_name: "ultrasonic"

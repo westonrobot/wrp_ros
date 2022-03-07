@@ -9,8 +9,16 @@ More details in the individual src sub-folders
 
 ## Dependencies
 
-1. wrp_sdk: v0.12.0  
-    Follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v0.12.0)
+1. wrp_sdk: v0.12.3  
+Use
+```
+echo "deb https://westonrobot.jfrog.io/artifactory/wrtoolbox-release $(lsb_release -cs) next" | sudo tee /etc/apt/sources.list.d/weston-robot.list
+```
+to replace
+```
+echo "deb https://westonrobot.jfrog.io/artifactory/wrtoolbox-release $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/weston-robot.list
+```
+for instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v0.12.0)
 
 ## Setup CAN-To-USB adapter
  
@@ -48,7 +56,7 @@ Scripts are provided [here](./scripts) for easy setup. You can run "./setup_can2
     ```bash
     $ mkdir -p ~/catkin_ws/src
     $ cd ~/catkin_ws/src
-    $ git clone https://gitlab.com/westonrobot/ros/wrp_ros.git
+    $ git clone https://github.com/westonrobot/wrp_ros.git
     $ cd ..
     $ catkin_make
     $ source devel/setup.bash
@@ -69,7 +77,13 @@ Scripts are provided [here](./scripts) for easy setup. You can run "./setup_can2
         roslaunch wrp_ros imu_sensor.launch 
         ```
 
-    3. Mobile Base Node (and [variants](./launch/mobile_base))
+    3. Ultrasonic Sensor Node
+
+        ```bash
+        roslaunch wrp_ros ultrasonic_sensor.launch 
+        ```
+
+    4. Mobile Base Node (and [variants](./launch/mobile_base))
 
         ```bash
         roslaunch wrp_ros scout_base.launch

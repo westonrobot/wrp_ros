@@ -9,6 +9,8 @@
 
 #include "wrp_ros/peripheral/gps_receiver_node.hpp"
 
+#include "wrp_sdk/peripheral/gps_receiver_nmea.hpp"
+
 namespace westonrobot {
 GpsReceiverNode::GpsReceiverNode() {
   if (!ReadParameters()) {
@@ -16,7 +18,7 @@ GpsReceiverNode::GpsReceiverNode() {
     ros::shutdown();
   }
 
-  receiver_ = std::make_shared<GpsReceiver>();
+  receiver_ = std::make_shared<GpsReceiverNmea>();
 
   if (!receiver_->Connect(device_path_, baud_rate_)) {
     ROS_ERROR("Failed to connect to GPS port: %s@%d", device_path_.c_str(),
@@ -51,7 +53,7 @@ bool GpsReceiverNode::ReadParameters() {
   return true;
 }
 
-void GpsReceiverNode::PublishCallback(const NavSatFix& gps_fix) {
+void GpsReceiverNode::PublishCallback(const NavSatFixMsg& gps_fix) {
   sat_fix_.header.stamp = ros::Time::now();
   sat_fix_.header.frame_id = frame_id_;
   sat_fix_.status.status = gps_fix.status.status;
