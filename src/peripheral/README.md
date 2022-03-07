@@ -7,9 +7,9 @@ ROS wrappers around wrp_sdk peripheral drivers.
 ## Nodes
 
 ### imu_sensor_node
-| Published Topic   | Type                  | Description                  |
-| ----------------- | --------------------- | ---------------------------- |
-| `/imu` | sensor_msgs::Imu | Outputs the IMU Sensor data. |
+| Published Topic | Type             | Description                  |
+| --------------- | ---------------- | ---------------------------- |
+| `/imu`          | sensor_msgs::Imu | Outputs the IMU Sensor data. |
 
 | Parameter     | Type | Description                                                                                 |
 | ------------- | ---- | ------------------------------------------------------------------------------------------- |
@@ -19,12 +19,26 @@ ROS wrappers around wrp_sdk peripheral drivers.
 
 
 ### gps_receiver_node
-| Published Topic            | Type                        | Description                                |
-| -------------------------- | --------------------------- | ------------------------------------------ |
-| `/fix` | sensor_msgs::NavSatFix | Outputs the navigation satellite fix data. |
+| Published Topic | Type                   | Description                                |
+| --------------- | ---------------------- | ------------------------------------------ |
+| `/fix`          | sensor_msgs::NavSatFix | Outputs the navigation satellite fix data. |
 
 | Parameter     | Type | Description                                                                                                             |
 | ------------- | ---- | ----------------------------------------------------------------------------------------------------------------------- |
 | `device_path` | str  | Path to receiver port.<br />Default: "/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_GNSS_receiver-if00"<br /> |
 | `baud_rate`   | int  | Sensor's communication baud rate.<br />Default: "115200"                                                                |
 | `frame_id`    | str  | Frame id used in /gps_receiver/navsat_fix's header.<br />Default: "gps_link"                                            |
+
+### ultrasonic_sensor_node
+| Published Topic    | Type               | Description                         |
+| ------------------ | ------------------ | ----------------------------------- |
+| `/ultrasonic<num>` | sensor_msgs::Range | Outputs the ultrasonic sensor data. |
+
+| Parameter      | Type   | Description                                                                                   |
+| -------------- | ------ | --------------------------------------------------------------------------------------------- |
+| `sensor_model` | string | Sensor's model.<br />Default: "dyp_a05"                                                       |
+| `device_path`  | str    | Path to sensor port.<br />Default: "/dev/ttyUSB0"<br />                                       |
+| `baud_rate`    | int    | Sensor's communication baud rate.<br />Default: "9600"                                        |
+| `frame_id`     | str    | Frame id used in /ultrasonic_sensor_node/ultrasonic's header.<br />Default: "ultrasonic_link" |
+| `topic name`   | str    | Topic used in /ultrasonic_sensor_node/ultrasonic's header.<br />Default: "ultrasonic"         |
+
