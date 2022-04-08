@@ -61,6 +61,8 @@ add_message_files(
     RangeDataType.msg
     RcState.msg
     SystemState.msg
+    PowerRegulatorChannelState.msg
+    PowerRegulatorDeviceState.msg
 )
 
 ## Generate services in the 'srv' folder
