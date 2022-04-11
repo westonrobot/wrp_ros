@@ -42,3 +42,16 @@ ROS wrappers around wrp_sdk peripheral drivers.
 | `frame_id`     | str    | Frame id used in /ultrasonic_sensor_node/ultrasonic's header.<br />Default: "ultrasonic_link" |
 | `topic name`   | str    | Topic used in /ultrasonic_sensor_node/ultrasonic's header.<br />Default: "ultrasonic"         |
 
+### power_regulator_node
+
+| Published Topic          | Type                               | Description                             |
+| ------------------------ | ---------------------------------- | --------------------------------------- |
+| `/power_regulator/state` | wrp_ros::PowerRegulatorDeviceState | Outputs the power regulator state data. |
+
+| Service                | Type                           | Description                             |
+| ---------------------- | ------------------------------ | --------------------------------------- |
+| `/power_regulator/cmd` | wrp_ros::PowerRegulatorControl | Control power regulator output channels |
+
+| Parameter     | Type   | Description                                                  |
+| ------------- | ------ | ------------------------------------------------------------ |
+| `device_path` | string | Path to power regulator can port.<br />Default: "can0"<br /> |
