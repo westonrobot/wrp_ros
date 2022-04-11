@@ -21,7 +21,22 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-find_package(wrp_sdk REQUIRED)
+find_package(wrp_sdk 1.0.0 REQUIRED)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LelyIO QUIET IMPORTED_TARGET liblely-io2)
+pkg_check_modules(LelyCOAPP QUIET IMPORTED_TARGET liblely-coapp)
+
+set(BUILD_PERIPH_MODULE OFF)
+if(LelyIO_FOUND AND LelyCOAPP_FOUND)
+    message(STATUS "Lely-core libraries found, peripheral module will be included")
+    set(BUILD_PERIPH_MODULE ON)
+else()
+    message(WARNING "CANopen-related dependencies are not found, ROS nodes for peripherals will not be built. Run the following commands to install the missing libraries:
+    $ sudo apt-get install -y software-properties-common 
+    $ sudo add-apt-repository ppa:lely/ppa && sudo apt-get update
+    $ sudo apt-get install -y pkg-config liblely-coapp-dev liblely-co-tools")
+endif()
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -46,6 +61,8 @@ add_message_files(
     RangeDataType.msg
     RcState.msg
     SystemState.msg
+    PowerRegulatorChannelState.msg
+    PowerRegulatorDeviceState.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -55,6 +72,7 @@ add_service_files(
   LightControl.srv
   AssistedModeControl.srv
   MotionReset.srv
+  PowerRegulatorControl.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -114,24 +132,30 @@ include_directories(
 )
 
 add_library(wrp_sdk_ros STATIC src/mobile_base/mobile_base_ros.cpp)
-target_link_libraries(wrp_sdk_ros ${catkin_LIBRARIES} westonrobot::wrp_sdk)
+target_link_libraries(wrp_sdk_ros ${catkin_LIBRARIES} westonrobot::wrp_sdk_robot)
 add_dependencies(wrp_sdk_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(mobile_base_node src/mobile_base/mobile_base_node.cpp)
 target_link_libraries(mobile_base_node wrp_sdk_ros ${catkin_LIBRARIES})
 
 # peripheral device support
-add_executable(gps_receiver_node src/peripheral/gps_receiver_node.cpp)
-target_link_libraries(gps_receiver_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
-add_dependencies(gps_receiver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+if(BUILD_PERIPH_MODULE)
+    add_executable(gps_receiver_node src/peripheral/gps_receiver_node.cpp)
+    target_link_libraries(gps_receiver_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
+    add_dependencies(gps_receiver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(imu_sensor_node src/peripheral/imu_sensor_node.cpp)
-target_link_libraries(imu_sensor_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
-add_dependencies(imu_sensor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+    add_executable(imu_sensor_node src/peripheral/imu_sensor_node.cpp)
+    target_link_libraries(imu_sensor_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
+    add_dependencies(imu_sensor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(ultrasonic_sensor_node src/peripheral/ultrasonic_sensor_node.cpp)
-target_link_libraries(ultrasonic_sensor_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
-add_dependencies(ultrasonic_sensor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+    add_executable(ultrasonic_sensor_node src/peripheral/ultrasonic_sensor_node.cpp)
+    target_link_libraries(ultrasonic_sensor_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
+    add_dependencies(ultrasonic_sensor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+    add_executable(power_regulator_node src/peripheral/power_regulator_node.cpp)
+    target_link_libraries(power_regulator_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
+    add_dependencies(power_regulator_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+endif()
 
 #############
 ## Install ##

@@ -1,0 +1,11 @@
+uint8 CHANNEL_19V  = 0
+uint8 CHANNEL_12V  = 1
+uint8 CHANNEL_5VI  = 2
+uint8 CHANNEL_12VI  = 3
+
+# request
+uint8 channel
+bool enable
+---
+# response
+bool state
