@@ -9,16 +9,8 @@ More details in the individual src sub-folders
 
 ## Dependencies
 
-1. wrp_sdk: v0.12.3  
-Use
-```
-echo "deb https://westonrobot.jfrog.io/artifactory/wrtoolbox-release $(lsb_release -cs) next" | sudo tee /etc/apt/sources.list.d/weston-robot.list
-```
-to replace
-```
-echo "deb https://westonrobot.jfrog.io/artifactory/wrtoolbox-release $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/weston-robot.list
-```
-for instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v0.12.0)
+1. wrp_sdk: v1.0.0 
+follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v1.0.0)
 
 ## Setup CAN-To-USB adapter
  
