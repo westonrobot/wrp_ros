@@ -14,6 +14,8 @@
 #include <ros/ros.h>
 
 #include "wrp_ros/PowerRegulatorDeviceState.h"
+#include "wrp_ros/PowerRegulatorControl.h"
+
 #include "wrp_sdk/interface/power_regulator_interface.hpp"
 
 namespace westonrobot {
@@ -27,11 +29,13 @@ class PowerRegulatorNode {
 
   ros::NodeHandle nh_;
   std::shared_ptr<PowerRegulatorInterface> regulator_;
-  ros::Publisher pub_;
-  ros::Timer pub_timer_;
-  wrp_ros::PowerRegulatorDeviceState device_state_;
+
+  ros::Publisher state_pub_;
+  ros::ServiceServer cmd_service_;
 
   void PublishCallback(const PowerRegulatorInterface::DeviceState& data);
+  bool HandleCommand(wrp_ros::PowerRegulatorControl::Request& req,
+                     wrp_ros::PowerRegulatorControl::Response& res);
   bool ReadParameters();
 };
 }  // namespace westonrobot
