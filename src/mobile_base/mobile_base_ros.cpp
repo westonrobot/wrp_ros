@@ -16,7 +16,6 @@
 #include "unitree_a1_adapter/a1_legged_base.hpp"
 #endif
 
-#include <nav_msgs/Odometry.h>
 #include <tf/transform_broadcaster.h>
 
 #include "wrp_ros/SystemState.h"
@@ -46,14 +45,18 @@ bool MobileBaseRos::ReadParameters() {
   nh_->getParam("base_frame", base_frame_);
   nh_->getParam("odom_frame", odom_frame_);
   nh_->getParam("auto_reconnect", auto_reconnect_);
+  nh_->getParam("wheel_base", wheel_base_);
 
   ROS_INFO(
-      "Successfully loaded the following parameters: \ncan_device: "
-      "%s\nrobot_type: "
-      "%s\nbase_frame: %s\nodom_frame: %s"
-      "\nauto_reconnect: %d",
-      can_device_.c_str(), robot_type_.c_str(), base_frame_.c_str(),
-      odom_frame_.c_str(), auto_reconnect_);
+      "Successfully loaded the following parameters: \n"
+      "can_device: %s\n"
+      "robot_type: %s\n"
+      "wheel_base: %s\n"
+      "base_frame: %s\n"
+      "odom_frame: %s\n"
+      "auto_reconnect: %d\n",
+      can_device_.c_str(), robot_type_.c_str(), wheel_base_.c_str(),
+      base_frame_.c_str(), odom_frame_.c_str(), auto_reconnect_);
   return true;
 }
 
@@ -153,9 +156,12 @@ void MobileBaseRos::PublishRobotState() {
     actuator_msg.motor.rpm = actuator_state[i].motor.rpm;
     actuator_msg.motor.current = actuator_state[i].motor.current;
     actuator_msg.motor.pulse_count = actuator_state[i].motor.pulse_count;
-    actuator_msg.driver.driver_voltage = actuator_state[i].driver.driver_voltage;
-    actuator_msg.driver.driver_temperature = actuator_state[i].driver.driver_temperature;
-    actuator_msg.driver.motor_temperature = actuator_state[i].driver.motor_temperature;
+    actuator_msg.driver.driver_voltage =
+        actuator_state[i].driver.driver_voltage;
+    actuator_msg.driver.driver_temperature =
+        actuator_state[i].driver.driver_temperature;
+    actuator_msg.driver.motor_temperature =
+        actuator_state[i].driver.motor_temperature;
     actuator_msg.driver.driver_state = actuator_state[i].driver.driver_state;
     actuator_state_msg.states.push_back(actuator_msg);
   }
@@ -167,21 +173,50 @@ void MobileBaseRos::PublishSensorData() {
 }
 
 void MobileBaseRos::PublishWheelOdometry() {
-  // TODO calculate odometry according to robot type
   auto robot_odom = robot_->GetOdometry();
 
+  // ATTN: odometry directly from wrp_sdk still in progress
+  geometry_msgs::Twist robot_twist;
+  robot_twist.linear.x = robot_odom.linear.x;
+  robot_twist.linear.y = robot_odom.linear.y;
+  robot_twist.linear.z = robot_odom.linear.z;
+  robot_twist.angular.x = robot_odom.angular.x;
+  robot_twist.angular.y = robot_odom.angular.y;
+  robot_twist.angular.z = robot_odom.angular.z;
+
+  nav_msgs::Odometry odom_msg = MobileBaseRos::CalculateOdometry(robot_twist);
+
+  // publish tf transformation
+  geometry_msgs::TransformStamped tf_msg;
+  tf_msg.header.stamp = odom_msg.header.stamp;
+  tf_msg.header.frame_id = odom_msg.header.frame_id;
+  tf_msg.child_frame_id = odom_msg.child_frame_id;
+
+  tf_msg.transform.translation.x = odom_msg.pose.pose.position.x;
+  tf_msg.transform.translation.y = odom_msg.pose.pose.position.y;
+  tf_msg.transform.translation.z = 0.0;
+  tf_msg.transform.rotation = odom_msg.pose.pose.orientation;
+
+  tf_broadcaster_.sendTransform(tf_msg);
+  odom_publisher_.publish(odom_msg);
+}
+
+nav_msgs::Odometry MobileBaseRos::CalculateOdometry(
+    geometry_msgs::Twist robot_twist) {
   auto current_time = ros::Time::now();
   float dt = (current_time - last_time_).toSec();
   last_time_ = current_time;
 
-  // if last_time is too old, reset calculation
-  if (dt > 10 * loop_period_) return;
+  // TODO: perform calculation based on robot type & wheel base other than scout
+  // & scout mini
+  double linear_speed = robot_twist.linear.x;
+  double angular_speed = robot_twist.angular.z;
+  double lateral_speed = robot_twist.linear.y;
 
-  auto linear_speed = robot_odom.linear.x;
-  auto angular_speed = robot_odom.angular.z;
-
-  double d_x = linear_speed * std::cos(theta_) * dt;
-  double d_y = linear_speed * std::sin(theta_) * dt;
+  double d_x =
+      (linear_speed * std::cos(theta_) - lateral_speed * std::sin(theta_)) * dt;
+  double d_y =
+      (linear_speed * std::sin(theta_) + lateral_speed * std::cos(theta_)) * dt;
   double d_theta = angular_speed * dt;
 
   position_x_ += d_x;
@@ -190,20 +225,6 @@ void MobileBaseRos::PublishWheelOdometry() {
 
   geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
 
-  // publish tf transformation
-  geometry_msgs::TransformStamped tf_msg;
-  tf_msg.header.stamp = current_time;
-  tf_msg.header.frame_id = odom_frame_;
-  tf_msg.child_frame_id = base_frame_;
-
-  tf_msg.transform.translation.x = position_x_;
-  tf_msg.transform.translation.y = position_y_;
-  tf_msg.transform.translation.z = 0.0;
-  tf_msg.transform.rotation = odom_quat;
-
-  tf_broadcaster_.sendTransform(tf_msg);
-
-  // publish odometry and tf messages
   nav_msgs::Odometry odom_msg;
   odom_msg.header.stamp = current_time;
   odom_msg.header.frame_id = odom_frame_;
@@ -218,7 +239,7 @@ void MobileBaseRos::PublishWheelOdometry() {
   odom_msg.twist.twist.linear.y = 0.0;
   odom_msg.twist.twist.angular.z = angular_speed;
 
-  odom_publisher_.publish(odom_msg);
+  return odom_msg;
 }
 
 void MobileBaseRos::MotionCmdCallback(
@@ -255,10 +276,6 @@ bool MobileBaseRos::HandleAssistedModeControl(
     wrp_ros::AssistedModeControl::Response& res) {
   AssistedModeSetCommand cmd;
   cmd.enable = req.enable;
-  /**ATTN: Should we check for token or change the interface here?
-   * If multiple user attempts to change, each one might have a different
-   * thinking if assisted mode is on or off.
-   */
   robot_->SetAssistedMode(cmd);
   res.state = req.enable;
   return true;
@@ -310,7 +327,7 @@ void MobileBaseRos::Run(double loop_hz) {
                   << static_cast<int>(ret) << std::endl;
       }
     }
-    
+
     PublishRobotState();
     PublishSensorData();
     PublishWheelOdometry();
