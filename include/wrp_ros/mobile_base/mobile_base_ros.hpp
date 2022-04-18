@@ -13,6 +13,7 @@
 #include <memory>
 
 #include <ros/ros.h>
+#include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
 #include <tf2_ros/transform_broadcaster.h>
 
@@ -64,6 +65,7 @@ class MobileBaseRos {
   std::string base_frame_ = "base_link";
   std::string robot_type_ = "weston";
   std::string odom_frame_ = "odom";
+  std::string wheel_base_ = "skid_steer";
 
   float position_x_ = 0.0;
   float position_y_ = 0.0;
@@ -79,6 +81,7 @@ class MobileBaseRos {
   void PublishRobotState();
   void PublishSensorData();
   void PublishWheelOdometry();
+  nav_msgs::Odometry CalculateOdometry(geometry_msgs::Twist robot_twist);
 
   void MotionCmdCallback(const geometry_msgs::Twist::ConstPtr& msg);
 

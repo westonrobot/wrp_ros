@@ -1,12 +1,12 @@
 <launch>
     <!-- 
-        Supported robot types:         
+        Supported types:         
         * robot_type: weston/agilex/vbot/unitree_a1
         * wheel_base: skid_steer/omni
     -->
     <arg name="can_device" default="can0" />
-    <arg name="robot_type" default="weston" />
-    <arg name="wheel_base" default="skid_steer" />
+    <arg name="robot_type" default="agilex" />
+    <arg name="wheel_base" default="omni" />
     <arg name="base_frame" default="base_link" />
     <arg name="odom_frame" default="odom" />
     <arg name="odom_topic_name" default="odom" />
