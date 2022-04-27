@@ -9,8 +9,8 @@ More details in the individual src sub-folders
 
 ## Dependencies
 
-1. wrp_sdk: v1.0.0 
-follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v1.0.0)
+1. wrp_sdk: v1.0.2 
+follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v1.0.x)
 
 ## Setup CAN-To-USB adapter
  
@@ -21,6 +21,7 @@ follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/samp
 2. Bringup can device
    ```
    $ sudo ip link set can0 up type can bitrate 1000000
+   $ sudo ip link set can0 txqueuelen 10000
    ```
 3. If no error occured during the previous steps, you should be able to see the can device now by using command
    ```
