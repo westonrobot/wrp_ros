@@ -1,12 +1,12 @@
 <launch>
     <!-- 
-        Supported types:         
+        Supported robot types:         
         * robot_type: weston/agilex/vbot/unitree_a1
         * motion_type: skid_steer/omni/differential
     -->
     <arg name="can_device" default="can0" />
     <arg name="robot_type" default="agilex" />
-    <arg name="motion_type" default="omni" />
+    <arg name="motion_type" default="differential" />
     <arg name="base_frame" default="base_link" />
     <arg name="odom_frame" default="odom" />
     <arg name="odom_topic_name" default="odom" />
