@@ -1,7 +1,7 @@
 <launch>
     <!-- 
         Supported robot types:         
-        * robot_type: weston/agilex/vbot/unitree_a1
+        * robot_type: weston/agilex
         * motion_type: skid_steer/omni/differential
     -->
     <arg name="can_device" default="can0" />

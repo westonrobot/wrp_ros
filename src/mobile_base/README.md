@@ -4,6 +4,18 @@
 
 ROS wrappers around wrp_sdk mobile base interface.
 
+## Support
+
+### Robot platforms
+| Robot Platform | Robot Base Type | CAN Bitrate | Support             |
+| -------------- | --------------- | ----------- | ------------------- |
+| Scout          | "weston"        | 1000000     | Supported           |
+| Scout Mini     | "agilex"        | 500000      | Supported           |
+| Hunter         | "agilex"        | 500000      | Not fully supported |
+| Tracer         | "agilex"        | 500000      | Supported           |
+| Bunker         | "agilex"        | 500000      | Not fully supported |
+| Ranger Mini    | "agilex"        | 500000      | Not fully supported |
+
 ## Nodes
 
 ### mobile_base_node
@@ -28,7 +40,7 @@ ROS wrappers around wrp_sdk mobile base interface.
 
 | Parameter         | Type | Description                                                                                         |
 | ----------------- | ---- | --------------------------------------------------------------------------------------------------- |
-| `robot_base_type` | str  | Robot base type.<br/>Default: "weston"<br/>Supported: "weston", "agilex" & "vbot"                   |
+| `robot_base_type` | str  | Robot base type.<br/>Default: "weston"<br/>Supported: "weston", "agilex"                            |
 | `can_device`      | str  | Robot's CAN port.<br/>Default: "can0"                                                               |
 | `base_frame`      | str  | Base frame id.<br/>Default: "base_link"<br/>                                                        |
 | `odom_frame`      | str  | Odometry frame id.<br />Default: "odom"                                                             |
