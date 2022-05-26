@@ -47,17 +47,17 @@ bool MobileBaseRos::ReadParameters() {
   nh_->getParam("base_frame", base_frame_);
   nh_->getParam("odom_frame", odom_frame_);
   nh_->getParam("auto_reconnect", auto_reconnect_);
-  nh_->getParam("wheel_base", wheel_base_);
+  nh_->getParam("motion_type", motion_type_);
 
   ROS_INFO(
       "Successfully loaded the following parameters: \n"
       "can_device: %s\n"
       "robot_type: %s\n"
-      "wheel_base: %s\n"
+      "motion_type: %s\n"
       "base_frame: %s\n"
       "odom_frame: %s\n"
       "auto_reconnect: %d\n",
-      can_device_.c_str(), robot_type_.c_str(), wheel_base_.c_str(),
+      can_device_.c_str(), robot_type_.c_str(), motion_type_.c_str(),
       base_frame_.c_str(), odom_frame_.c_str(), auto_reconnect_);
   return true;
 }

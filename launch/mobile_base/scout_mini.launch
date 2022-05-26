@@ -2,11 +2,11 @@
     <!-- 
         Supported types:         
         * robot_type: weston/agilex/vbot/unitree_a1
-        * wheel_base: skid_steer/omni
+        * motion_type: skid_steer/omni
     -->
     <arg name="can_device" default="can0" />
     <arg name="robot_type" default="agilex" />
-    <arg name="wheel_base" default="omni" />
+    <arg name="motion_type" default="omni" />
     <arg name="base_frame" default="base_link" />
     <arg name="odom_frame" default="odom" />
     <arg name="odom_topic_name" default="odom" />
@@ -15,7 +15,7 @@
     <node name="mobile_base_node" pkg="wrp_ros" type="mobile_base_node" output="screen">
         <param name="can_device" type="string" value="$(arg can_device)" />
         <param name="robot_type" type="string" value="$(arg robot_type)" />
-        <param name="wheel_base" type="string" value="$(arg wheel_base)" />
+        <param name="motion_type" type="string" value="$(arg motion_type)" />
         <param name="base_frame" type="string" value="$(arg base_frame)" />
         <param name="odom_frame" type="string" value="$(arg odom_frame)" />
         <param name="auto_reconnect" type="bool" value="$(arg auto_reconnect)" />
