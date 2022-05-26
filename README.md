@@ -12,7 +12,21 @@ More details in the individual src sub-folders
 1. wrp_sdk: v1.0.2 
 follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v1.0.x)
 
-## Setup CAN-To-USB adapter
+## Support
+
+### Robot Platforms
+See [Mobile Base Node](./src/mobile_base)
+
+### Environments
+* Architecture: x86_64/arm64
+* OS: Ubuntu 16.04/18.04/20.04
+* ROS: Kinetic/Melodic/Noetic
+
+It should also work in other similar Linux environments but only the above listed environments are regularly tested.
+
+## Basic Usage
+
+### Setup CAN-To-USB adapter
  
 1. Enable gs_usb kernel module
     ```
@@ -41,8 +55,7 @@ follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/samp
 
 Scripts are provided [here](./scripts) for easy setup. You can run "./setup_can2usb.bash" for the first-time setup and run "./bringup_can2usb_1m.bash" to bring up the device each time you unplug and re-plug the adapter.
 
-## Basic Usage
-
+### Building and Running Nodes
 1. Clone the packages into a colcon workspace and compile/source.  
 (the following instructions assume your catkin workspace is at: ~/catkin_ws/src)
 

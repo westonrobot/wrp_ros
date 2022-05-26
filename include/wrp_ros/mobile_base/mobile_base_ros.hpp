@@ -15,6 +15,7 @@
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
+#include <sensor_msgs/BatteryState.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 #include "wrp_ros/MotionCommand.h"
@@ -46,6 +47,7 @@ class MobileBaseRos {
   ros::Publisher system_state_publisher_;
   ros::Publisher motion_state_publisher_;
   ros::Publisher actuator_state_publisher_;
+  ros::Publisher battery_state_publisher_;
 
   ros::Publisher ultrasonic_data_publisher_;
   ros::Publisher tof_data_publisher_;
@@ -65,7 +67,7 @@ class MobileBaseRos {
   std::string base_frame_ = "base_link";
   std::string robot_type_ = "weston";
   std::string odom_frame_ = "odom";
-  std::string wheel_base_ = "skid_steer";
+  std::string motion_type_ = "skid_steer";
 
   float position_x_ = 0.0;
   float position_y_ = 0.0;

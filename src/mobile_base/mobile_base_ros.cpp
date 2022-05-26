@@ -9,6 +9,8 @@
 
 #include "wrp_ros/mobile_base/mobile_base_ros.hpp"
 
+#include <limits>
+
 #include "wrp_sdk/mobile_base/westonrobot/mobile_base.hpp"
 #include "wrp_sdk/mobile_base/agilex/agilex_base_v2_adapter.hpp"
 
@@ -45,17 +47,17 @@ bool MobileBaseRos::ReadParameters() {
   nh_->getParam("base_frame", base_frame_);
   nh_->getParam("odom_frame", odom_frame_);
   nh_->getParam("auto_reconnect", auto_reconnect_);
-  nh_->getParam("wheel_base", wheel_base_);
+  nh_->getParam("motion_type", motion_type_);
 
   ROS_INFO(
       "Successfully loaded the following parameters: \n"
       "can_device: %s\n"
       "robot_type: %s\n"
-      "wheel_base: %s\n"
+      "motion_type: %s\n"
       "base_frame: %s\n"
       "odom_frame: %s\n"
       "auto_reconnect: %d\n",
-      can_device_.c_str(), robot_type_.c_str(), wheel_base_.c_str(),
+      can_device_.c_str(), robot_type_.c_str(), motion_type_.c_str(),
       base_frame_.c_str(), odom_frame_.c_str(), auto_reconnect_);
   return true;
 }
@@ -100,6 +102,8 @@ void MobileBaseRos::SetupSubscription() {
   actuator_state_publisher_ =
       nh_->advertise<wrp_ros::ActuatorStateArray>("/actuator_state", 10);
   odom_publisher_ = nh_->advertise<nav_msgs::Odometry>("/odom", 50);
+  battery_state_publisher_ =
+      nh_->advertise<sensor_msgs::BatteryState>("/battery_state", 10);
 
   // subscribers
   motion_cmd_subscriber_ = nh_->subscribe<geometry_msgs::Twist>(
@@ -121,6 +125,7 @@ void MobileBaseRos::PublishRobotState() {
   auto system_state = robot_->GetSystemState();
   auto motion_state = robot_->GetMotionState();
   auto actuator_state = robot_->GetActuatorState();
+  auto battery_state = robot_->GetBatteryState();
 
   // system state
   wrp_ros::SystemState system_state_msg;
@@ -166,6 +171,24 @@ void MobileBaseRos::PublishRobotState() {
     actuator_state_msg.states.push_back(actuator_msg);
   }
   actuator_state_publisher_.publish(actuator_state_msg);
+
+  // battery state
+  sensor_msgs::BatteryState battery_state_msg;
+  battery_state_msg.header.stamp = ros::Time::now();
+  battery_state_msg.voltage = battery_state.voltage;
+  battery_state_msg.current = std::numeric_limits<float>::quiet_NaN();
+  battery_state_msg.charge = std::numeric_limits<float>::quiet_NaN();
+  battery_state_msg.capacity = std::numeric_limits<float>::quiet_NaN();
+  battery_state_msg.design_capacity = std::numeric_limits<float>::quiet_NaN();
+  battery_state_msg.percentage = battery_state.percentage / 100.0f;
+  battery_state_msg.power_supply_status =
+      sensor_msgs::BatteryState::POWER_SUPPLY_STATUS_UNKNOWN;
+  battery_state_msg.power_supply_health =
+      sensor_msgs::BatteryState::POWER_SUPPLY_HEALTH_UNKNOWN;
+  battery_state_msg.power_supply_technology =
+      sensor_msgs::BatteryState::POWER_SUPPLY_TECHNOLOGY_LION;
+  battery_state_msg.present = battery_state.present;
+  battery_state_publisher_.publish(battery_state_msg);
 }
 
 void MobileBaseRos::PublishSensorData() {
