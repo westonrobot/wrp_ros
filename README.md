@@ -87,28 +87,34 @@ Scripts are provided [here](./scripts) for convenience. You can run "./setup_can
 
 You can find more information about robot base control from [this page](https://docs.westonrobot.net/getting_started/basics/robot_base_control.html).
 
- **_You may need to change runtime parameters by editing the corresponding launch file_**
+**_You may need to change runtime parameters by editing the corresponding launch file_**
 
- 1. Mobile Base Node (and [variants](./launch/mobile_base))
+1. Mobile Base Node (and [variants](./launch/mobile_base))
 
-     ```bash
-     roslaunch wrp_ros scout_base.launch
-     ```
+    ```bash
+    roslaunch wrp_ros scout_base.launch
+    ```
 
- 2. GPS Receiver Node
+2. Power Regulator Node
 
-     ```bash
-     roslaunch wrp_ros gps_receiver.launch 
-     ```
+    ```bash
+    roslaunch wrp_ros power_regulator.launch
+    ```
 
- 3. IMU Sensor Node
+3. GPS Receiver Node
 
-     ```bash
-     roslaunch wrp_ros imu_sensor.launch 
-     ```
+    ```bash
+    roslaunch wrp_ros gps_receiver.launch 
+    ```
 
- 4. Ultrasonic Sensor Node
+4. IMU Sensor Node
 
-     ```bash
-     roslaunch wrp_ros ultrasonic_sensor.launch 
-     ```
+    ```bash
+    roslaunch wrp_ros imu_sensor.launch 
+    ```
+
+5. Ultrasonic Sensor Node
+
+    ```bash
+    roslaunch wrp_ros ultrasonic_sensor.launch 
+    ```
