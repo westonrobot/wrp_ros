@@ -1,32 +1,50 @@
-# wrp_ros
+# Weston Robot Platform Support - ROS (wrp_ros)
 
 ## About
 
-This package contains a minimal wrapper around wrp_sdk.
-More details in the individual src sub-folders
-  1. [Peripheral Nodes](./src/peripheral)
-  2. [Mobile Base Node](./src/mobile_base)
+This package contains a minimal wrapper around wrp_sdk and provides a ROS interface to hardware platforms from Weston Robot. Please first check if your device and environment are supported by the SDK and this ROS package before proceeding:
 
-## Dependencies
+**Supported Environments**:
 
-1. wrp_sdk: v1.0.2 
-follow instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v1.0.x)
-
-## Support
-
-### Robot Platforms
-See [Mobile Base Node](./src/mobile_base)
-
-### Environments
 * Architecture: x86_64/arm64
-* OS: Ubuntu 16.04/18.04/20.04
-* ROS: Kinetic/Melodic/Noetic
+* OS: Ubuntu 18.04/20.04
+* ROS: Melodic/Noetic
+  
+**Supported Robots**:
 
-It should also work in other similar Linux environments but only the above listed environments are regularly tested.
+* Scout
+* Scout Mini
+* Tracer
 
-## Basic Usage
+**Supported Peripherals**:
 
-### Setup CAN-To-USB adapter
+* Power Regulator V2.1
+* Ultrasonic Sensor
+* Hipnuc and WitMotion IMU
+* NMEA-compatible GPS Receiver
+
+More details can be found in the README inside individual src sub-folders
+
+  * [Mobile Base Node](./src/mobile_base)
+  * [Peripheral Nodes](./src/peripheral)
+
+## Build the package
+
+### Install dependencies
+
+* wrp_sdk >= v1.0.2: please follow setup instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v1.0.x)
+
+### Build the package
+
+```
+$ cd <your-catkin-workspace>/src
+$ git clone https://github.com/westonrobot/wrp_ros
+$ cd ..
+$ catkin_make
+$ source devel/setup.bash
+```
+
+## Setup CAN-To-USB adapter
  
 1. Enable gs_usb kernel module
     ```
@@ -34,9 +52,19 @@ It should also work in other similar Linux environments but only the above liste
     ```
 2. Bringup can device
    ```
-   $ sudo ip link set can0 up type can bitrate 1000000
-   $ sudo ip link set can0 txqueuelen 10000
+   # (NOTE: refer to the following table for the correct bitrate)
+   $ sudo ip link set can0 up type can bitrate 500000
+   $ sudo ip link set can0 txqueuelen 1000
    ```
+
+    | Hardware                 | CAN Bitrate |
+    | ------------------------ | ----------- |
+    | Scout V2.0               | 500000      |
+    | Scout V2.5               | 1000000     |
+    | Scout Mini               | 500000      |
+    | Power Regulator          | 500000      |
+    | Otherwise if unspecified | 500000      |
+
 3. If no error occured during the previous steps, you should be able to see the can device now by using command
    ```
    $ ifconfig -a
@@ -53,44 +81,34 @@ It should also work in other similar Linux environments but only the above liste
     $ cansend can0 001#1122334455667788
     ```
 
-Scripts are provided [here](./scripts) for easy setup. You can run "./setup_can2usb.bash" for the first-time setup and run "./bringup_can2usb_1m.bash" to bring up the device each time you unplug and re-plug the adapter.
+Scripts are provided [here](./scripts) for convenience. You can run "./setup_can2usb.bash" for the first-time setup and run "./bringup_can2usb_1m.bash" to bring up the device each time you unplug and re-plug the adapter.
 
-### Building and Running Nodes
-1. Clone the packages into a colcon workspace and compile/source.  
-(the following instructions assume your catkin workspace is at: ~/catkin_ws/src)
+## Example Usage
 
-    ```bash
-    $ mkdir -p ~/catkin_ws/src
-    $ cd ~/catkin_ws/src
-    $ git clone https://github.com/westonrobot/wrp_ros.git
-    $ cd ..
-    $ catkin_make
-    $ source devel/setup.bash
-    ```
+You can find more information about robot base control from [this page](https://docs.westonrobot.net/getting_started/basics/robot_base_control.html).
 
-2. Launch ROS nodes  
-    **_Change run time parameters by editing the corresponding launch file_**
+ **_You may need to change runtime parameters by editing the corresponding launch file_**
 
-    1. GPS Receiver Node
+ 1. Mobile Base Node (and [variants](./launch/mobile_base))
 
-        ```bash
-        roslaunch wrp_ros gps_receiver.launch 
-        ```
+     ```bash
+     roslaunch wrp_ros scout_base.launch
+     ```
 
-    2. IMU Sensor Node
+ 2. GPS Receiver Node
 
-        ```bash
-        roslaunch wrp_ros imu_sensor.launch 
-        ```
+     ```bash
+     roslaunch wrp_ros gps_receiver.launch 
+     ```
 
-    3. Ultrasonic Sensor Node
+ 3. IMU Sensor Node
 
-        ```bash
-        roslaunch wrp_ros ultrasonic_sensor.launch 
-        ```
+     ```bash
+     roslaunch wrp_ros imu_sensor.launch 
+     ```
 
-    4. Mobile Base Node (and [variants](./launch/mobile_base))
+ 4. Ultrasonic Sensor Node
 
-        ```bash
-        roslaunch wrp_ros scout_base.launch
-        ```
+     ```bash
+     roslaunch wrp_ros ultrasonic_sensor.launch 
+     ```
