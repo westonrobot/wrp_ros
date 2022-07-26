@@ -10,6 +10,7 @@
 #include "wrp_ros/peripheral/imu_sensor_node.hpp"
 
 #include "wrp_sdk/peripheral/imu_sensor_wit.hpp"
+#include "wrp_sdk/peripheral/imu_sensor_hipnuc.hpp"
 
 namespace westonrobot {
 ImuSensorNode::ImuSensorNode() {
@@ -18,7 +19,11 @@ ImuSensorNode::ImuSensorNode() {
     ros::shutdown();
   }
 
-  sensor_ = std::make_shared<ImuSensorWit>();
+  if (sensor_model_ == "hipnuc") {
+    sensor_ = std::make_shared<ImuSensorHipnuc>();
+  } else {
+    sensor_ = std::make_shared<ImuSensorWit>();
+  }
 
   if (!sensor_->Connect(device_path_, baud_rate_)) {
     ROS_ERROR("Failed to connect to IMU sensor: %s@%d", device_path_.c_str(),
@@ -71,8 +76,12 @@ bool ImuSensorNode::ReadParameters() {
   nh_.getParam("sensor_model", sensor_model_);
   nh_.getParam("device_path", device_path_);
   nh_.getParam("baud_rate", baud_rate_);
-
   nh_.getParam("frame_id", frame_id_);
+
+  if (sensor_model_ != "wit" && sensor_model_ != "hipnuc") {
+    ROS_WARN("Invalid sensor model detected, defaulting to \"wit\"!!!!!!!!!");
+    sensor_model_ = "wit";
+  }
 
   ROS_INFO(
       "Successfully loaded the following parameters: \nDevice path: "
