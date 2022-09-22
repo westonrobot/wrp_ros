@@ -70,9 +70,9 @@ bool UltrasonicSensorNode::ReadParameters() {
   nh_.getParam("topic_name", topic_name_);
 
   ROS_INFO(
-      "Successfully loaded the following parameters: \nDevice path: "
+      "Successfully loaded the following parameters: \nSensor model: %s\nDevice path: "
       "%s\nBaud rate: %d\nFrame id: %s",
-      device_path_.c_str(), baud_rate_, frame_id_.c_str());
+      sensor_model_.c_str(), device_path_.c_str(), baud_rate_, frame_id_.c_str());
   return true;
 }
 }  // namespace westonrobot
