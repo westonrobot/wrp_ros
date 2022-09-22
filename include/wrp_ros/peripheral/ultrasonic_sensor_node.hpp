@@ -27,7 +27,7 @@ class UltrasonicSensorNode {
   std::string device_path_ = "/dev/ttyUSB0";
   int baud_rate_ = 115200;
   std::string topic_name_ = "ultrasonic";
-  std::string frame_id_ = "ultrasonic";
+  std::string frame_id_ = "ultrasonic_link";
 
   ros::NodeHandle nh_;
   std::shared_ptr<UltrasonicInterface> sensor_;

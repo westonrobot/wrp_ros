@@ -10,6 +10,7 @@
 #include "wrp_ros/peripheral/ultrasonic_sensor_node.hpp"
 
 #include "wrp_sdk/peripheral/ultrasonic_sensor_dyp.hpp"
+#include "wrp_sdk/peripheral/ultrasonic_sensor_w200d.hpp"
 
 namespace westonrobot {
 UltrasonicSensorNode::UltrasonicSensorNode() {
@@ -18,9 +19,10 @@ UltrasonicSensorNode::UltrasonicSensorNode() {
     ros::shutdown();
   }
 
-  if (sensor_model_ == "dyp_a05") {
-    sensor_ = std::make_shared<UltrasonicSensorDyp>();
+  if (sensor_model_ == "w200d") {
+    sensor_ = std::make_shared<UltrasonicSensorW200d>();
   } else {
+    sensor_ = std::make_shared<UltrasonicSensorDyp>();
   }
 
   pubs_.resize(8);
