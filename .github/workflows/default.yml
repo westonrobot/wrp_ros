@@ -1,0 +1,59 @@
+name: default
+
+on:
+  push:
+    branches:
+      - "**"
+      - "!experiment-*"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        container: ["westonrobot/ros:melodic-ci", "westonrobot/ros:noetic-ci"]
+        runner: [[self-hosted, Linux, X64], [self-hosted, Linux, ARM64]]
+    runs-on: ${{ matrix.runner}}
+    container:
+      image: ${{ matrix.container }}
+    steps:
+      - name: Upgrade git if on Ubuntu 18.04
+        if: |
+          contains(${{ matrix.container }}, 'bionic') || contains(${{ matrix.container }}, 'zephyr') || contains(${{ matrix.container }}, 'melodic')
+        run: |
+          sudo add-apt-repository -y ppa:git-core/ppa
+          sudo apt-get update
+          sudo apt-get install -y git
+      - name: Create catkin workspace
+          mkdir -p ${GITHUB_WORKSPACE}/catkin_ws/src
+          cd /catkin_ws/src
+          /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash
+          catkin_init_workspace
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.GIT_REPO_SSH_KEY }}
+          submodules: recursive
+          path: "catkin_ws/src/"
+      - name: Install latest wrp_sdk
+        run: |
+          echo "deb https://westonrobot.jfrog.io/artifactory/wrtoolbox-release bionic main" | tee /etc/apt/sources.list.d/weston-robot.list
+          echo "deb https://westonrobot.jfrog.io/artifactory/wrtoolbox-release bionic next" >> /etc/apt/sources.list.d/weston-robot.list
+          curl -sSL 'https://westonrobot.jfrog.io/artifactory/api/security/keypair/wr-deb/public' | apt-key add -
+          apt-get update && apt-get -y install wrp_sdk
+      - name: Install latest lely-can
+        run: |
+          add-apt-repository ppa:lely/ppa
+          apt-get update && apt-get -y install pkg-config liblely-coapp-dev liblely-co-tools
+      - name: Install ROS dependencies
+        run: |
+          source /opt/ros/${ROS_DISTRO}/setup.bash
+          rosdep update
+          rosdep install -y --ignore-src --from-paths src --rosdistro ${ROS_DISTRO} --skip-keys wrp_sdk --skip-keys wrp_zbus
+      - name: Catkin make
+        run: |
+          cd ${GITHUB_WORKSPACE}/catkin_ws
+          /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash
+          catkin_make
