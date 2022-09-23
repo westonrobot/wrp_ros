@@ -37,9 +37,9 @@ ROS wrappers around wrp_sdk peripheral drivers.
 
 | Parameter      | Type   | Description                                                                                   |
 | -------------- | ------ | --------------------------------------------------------------------------------------------- |
-| `sensor_model` | string | Sensor's model.<br />Default: "dyp_a05"                                                       |
+| `sensor_model` | string | Sensor's model.<br />Default: "dyp_a05"<br /> Supported: "dyp_a05", "w200d"                   |
 | `device_path`  | str    | Path to sensor port.<br />Default: "/dev/ttyUSB0"<br />                                       |
-| `baud_rate`    | int    | Sensor's communication baud rate.<br />Default: "9600"                                        |
+| `baud_rate`    | int    | Sensor's communication baud rate.<br />Default: "115200"                                        |
 | `frame_id`     | str    | Frame id used in /ultrasonic_sensor_node/ultrasonic's header.<br />Default: "ultrasonic_link" |
 | `topic name`   | str    | Topic used in /ultrasonic_sensor_node/ultrasonic's header.<br />Default: "ultrasonic"         |
 
