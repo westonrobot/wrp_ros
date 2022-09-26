@@ -10,6 +10,7 @@
 #include "wrp_ros/peripheral/ultrasonic_sensor_node.hpp"
 
 #include "wrp_sdk/peripheral/ultrasonic_sensor_dyp.hpp"
+#include "wrp_sdk/peripheral/ultrasonic_sensor_w200d.hpp"
 
 namespace westonrobot {
 UltrasonicSensorNode::UltrasonicSensorNode() {
@@ -18,9 +19,10 @@ UltrasonicSensorNode::UltrasonicSensorNode() {
     ros::shutdown();
   }
 
-  if (sensor_model_ == "dyp_a05") {
-    sensor_ = std::make_shared<UltrasonicSensorDyp>();
+  if (sensor_model_ == "w200d") {
+    sensor_ = std::make_shared<UltrasonicSensorW200d>();
   } else {
+    sensor_ = std::make_shared<UltrasonicSensorDyp>();
   }
 
   pubs_.resize(8);
@@ -68,9 +70,9 @@ bool UltrasonicSensorNode::ReadParameters() {
   nh_.getParam("topic_name", topic_name_);
 
   ROS_INFO(
-      "Successfully loaded the following parameters: \nDevice path: "
+      "Successfully loaded the following parameters: \nSensor model: %s\nDevice path: "
       "%s\nBaud rate: %d\nFrame id: %s",
-      device_path_.c_str(), baud_rate_, frame_id_.c_str());
+      sensor_model_.c_str(), device_path_.c_str(), baud_rate_, frame_id_.c_str());
   return true;
 }
 }  // namespace westonrobot
