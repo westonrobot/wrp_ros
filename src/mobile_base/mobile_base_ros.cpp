@@ -176,17 +176,17 @@ void MobileBaseRos::PublishRobotState() {
   sensor_msgs::BatteryState battery_state_msg;
   battery_state_msg.header.stamp = ros::Time::now();
   battery_state_msg.voltage = battery_state.voltage;
-  battery_state_msg.current = std::numeric_limits<float>::quiet_NaN();
-  battery_state_msg.charge = std::numeric_limits<float>::quiet_NaN();
-  battery_state_msg.capacity = std::numeric_limits<float>::quiet_NaN();
-  battery_state_msg.design_capacity = std::numeric_limits<float>::quiet_NaN();
+  battery_state_msg.current = battery_state.current;
+  battery_state_msg.charge = battery_state.charge;
+  battery_state_msg.capacity = battery_state.capacity;
+  battery_state_msg.design_capacity = battery_state.design_capacity;
   battery_state_msg.percentage = battery_state.percentage / 100.0f;
   battery_state_msg.power_supply_status =
-      sensor_msgs::BatteryState::POWER_SUPPLY_STATUS_UNKNOWN;
+      static_cast<uint8_t>(battery_state.power_supply_status);
   battery_state_msg.power_supply_health =
-      sensor_msgs::BatteryState::POWER_SUPPLY_HEALTH_UNKNOWN;
+      static_cast<uint8_t>(battery_state.power_supply_health);
   battery_state_msg.power_supply_technology =
-      sensor_msgs::BatteryState::POWER_SUPPLY_TECHNOLOGY_LION;
+      static_cast<uint8_t>(battery_state.power_supply_technology);
   battery_state_msg.present = battery_state.present;
   battery_state_publisher_.publish(battery_state_msg);
 }
