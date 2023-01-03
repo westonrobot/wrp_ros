@@ -22,6 +22,7 @@ jobs:
       run:
         shell: bash
     steps:
+      - uses:  westonrobot-dev/action-cleanup@master
       - name: Upgrade git if on Ubuntu 18.04
         if: |
           contains(matrix.container, 'bionic') || contains(matrix.container, 'zephyr') || contains(matrix.container, 'melodic')
