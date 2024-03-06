@@ -49,9 +49,9 @@ ROS wrappers around wrp_sdk peripheral drivers.
 | ------------------------ | ---------------------------------- | --------------------------------------- |
 | `/power_regulator/state` | wrp_ros::PowerRegulatorDeviceState | Outputs the power regulator state data. |
 
-| Service                | Type                           | Description                             |
-| ---------------------- | ------------------------------ | --------------------------------------- |
-| `/power_regulator/cmd` | wrp_ros::PowerRegulatorControl | Control power regulator output channels |
+| Service                | Type                           | Description                              |
+| ---------------------- | ------------------------------ | ---------------------------------------- |
+| `/power_regulator/cmd` | wrp_ros::PowerRegulatorControl | Control power regulator output channels. |
 
 | Parameter     | Type   | Description                                                  |
 | ------------- | ------ | ------------------------------------------------------------ |
@@ -59,13 +59,17 @@ ROS wrappers around wrp_sdk peripheral drivers.
 
 ### lift_controller_node
 
-| Action                 | Type                       | Description                  |
-| ---------------------- | -------------------------- | ---------------------------- |
-| `/lift_controller/goal`| wrp_ros::LiftControlAction | Provides a goal to the lift. |
+| Published Topic                | Type                | Description                                |
+| ------------------------------ | ------------------- | ------------------------------------------ |
+| `/lift_controller/lift_status` | wrp_ros::LiftStatus | Outputs the lift orientation and position. |
 
-| Service                       | Type               | Description                              |
-| ----------------------------- | ------------------ | ---------------------------------------- |
-| `/lift_controller/query_state`| wrp_ros::LiftQuery | Query for state of the provided lift id. |
+| Action                  | Type                       | Description                  |
+| ----------------------- | -------------------------- | ---------------------------- |
+| `/lift_controller/goal` | wrp_ros::LiftControlAction | Provides a goal to the lift. |
+
+| Service                        | Type               | Description                              |
+| ------------------------------ | ------------------ | ---------------------------------------- |
+| `/lift_controller/query_state` | wrp_ros::LiftQuery | Query for state of the provided lift id. |
 
 | Parameter     | Type   | Description                                                      |
 | ------------- | ------ | ---------------------------------------------------------------- |

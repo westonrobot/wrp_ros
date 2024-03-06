@@ -27,23 +27,21 @@ LiftControllerNode::LiftControllerNode()
     std::cerr << "Failed to connect to lift controller" << std::endl;
     ros::shutdown();
   }
+
+  lift_status_pub_ =
+      nh_.advertise<wrp_ros::LiftStatus>("/lift_controller/lift_status", 10);
+
   query_server_ = nh_.advertiseService(
       "/lift_controller/query_state", &LiftControllerNode::QueryCallback, this);
 
   lift_control_server_.start();
+
+  LiftControllerNode::PublishLiftState();
 }
 
 LiftControllerNode::~LiftControllerNode() {
   lift_controller_.Disconnect();
   ros::shutdown();
-}
-
-bool LiftControllerNode::QueryCallback(wrp_ros::LiftQuery::Request& req,
-                                       wrp_ros::LiftQuery::Response& res) {
-  LiftState state = lift_controller_.GetLiftState(req.id);
-  res.position = state.position;
-  res.speed = state.speed;
-  return true;
 }
 
 void LiftControllerNode::LiftControllerCallback(
@@ -76,6 +74,38 @@ void LiftControllerNode::LiftControllerCallback(
   result.speed = state.speed;
 
   lift_control_server_.setSucceeded(result);
+}
+
+bool LiftControllerNode::QueryCallback(wrp_ros::LiftQuery::Request& req,
+                                       wrp_ros::LiftQuery::Response& res) {
+  LiftState state = lift_controller_.GetLiftState(req.id);
+  res.position = state.position;
+  res.speed = state.speed;
+  return true;
+}
+
+void LiftControllerNode::PublishLiftState() {
+  signal(SIGINT, LiftControllerNode::ExitSignalHandler);
+  wrp_ros::LiftStatus lift_status_msg;
+
+  while (ros::ok) {
+    for (uint8_t orientation = lift_status_msg.LIFT_HORIZONTAL;
+         orientation <= lift_status_msg.LIFT_VERTICAL; ++orientation) {
+      LiftState lift_state = lift_controller_.GetLiftState(orientation);
+
+      lift_status_msg.orientation = orientation;
+      lift_status_msg.position = lift_state.position;
+      lift_status_pub_.publish(lift_status_msg);
+    }
+    ros::spinOnce();
+    ros::Rate(10).sleep();
+  }
+}
+
+void LiftControllerNode::ExitSignalHandler(int sig) {
+  ROS_INFO("Ctrl+C detected, shutting down...");
+  ros::shutdown();
+  exit(0);
 }
 
 bool LiftControllerNode::ReadParameters() {
