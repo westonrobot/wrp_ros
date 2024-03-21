@@ -67,8 +67,7 @@ void LiftControllerNode::LiftControllerCallback(
       feedback.speed = state.speed;
       lift_control_server_.publishFeedback(feedback);
     }
-  } while (state.position >= (goal->position) + 2 ||
-           state.position <= (goal->position) - 2);
+  } while (state.position != (goal->position));
 
   result.id = state.id;
   result.position = state.position;
