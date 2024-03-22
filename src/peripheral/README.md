@@ -39,7 +39,7 @@ ROS wrappers around wrp_sdk peripheral drivers.
 | -------------- | ------ | --------------------------------------------------------------------------------------------- |
 | `sensor_model` | string | Sensor's model.<br />Default: "dyp_a05"<br /> Supported: "dyp_a05", "w200d"                   |
 | `device_path`  | str    | Path to sensor port.<br />Default: "/dev/ttyUSB0"<br />                                       |
-| `baud_rate`    | int    | Sensor's communication baud rate.<br />Default: "115200"                                        |
+| `baud_rate`    | int    | Sensor's communication baud rate.<br />Default: "115200"                                      |
 | `frame_id`     | str    | Frame id used in /ultrasonic_sensor_node/ultrasonic's header.<br />Default: "ultrasonic_link" |
 | `topic name`   | str    | Topic used in /ultrasonic_sensor_node/ultrasonic's header.<br />Default: "ultrasonic"         |
 
@@ -49,10 +49,29 @@ ROS wrappers around wrp_sdk peripheral drivers.
 | ------------------------ | ---------------------------------- | --------------------------------------- |
 | `/power_regulator/state` | wrp_ros::PowerRegulatorDeviceState | Outputs the power regulator state data. |
 
-| Service                | Type                           | Description                             |
-| ---------------------- | ------------------------------ | --------------------------------------- |
-| `/power_regulator/cmd` | wrp_ros::PowerRegulatorControl | Control power regulator output channels |
+| Service                | Type                           | Description                              |
+| ---------------------- | ------------------------------ | ---------------------------------------- |
+| `/power_regulator/cmd` | wrp_ros::PowerRegulatorControl | Control power regulator output channels. |
 
 | Parameter     | Type   | Description                                                  |
 | ------------- | ------ | ------------------------------------------------------------ |
 | `device_path` | string | Path to power regulator can port.<br />Default: "can0"<br /> |
+
+### lift_controller_node
+
+| Published Topic                | Type                | Description                                |
+| ------------------------------ | ------------------- | ------------------------------------------ |
+| `/lift_controller/lift_status` | wrp_ros::LiftStatus | Outputs the lift id and position. |
+
+| Action                  | Type                       | Description                  |
+| ----------------------- | -------------------------- | ---------------------------- |
+| `/lift_controller/goal` | wrp_ros::LiftControlAction | Provides a goal to the lift. |
+
+| Service                        | Type               | Description                              |
+| ------------------------------ | ------------------ | ---------------------------------------- |
+| `/lift_controller/query_state` | wrp_ros::LiftQuery | Query for state of the provided lift id. |
+
+| Parameter     | Type   | Description                                                      |
+| ------------- | ------ | ---------------------------------------------------------------- |
+| `device_path` | string | Path to lift controller port.<br />Default: "/dev/ttyUSB0"<br /> |
+| `baud_rate`   | int    | Lift server's communication baud rate.<br />Default: "115200"    |

@@ -32,7 +32,7 @@ More details can be found in the README inside individual src sub-folders
 
 ### Install dependencies
 
-* wrp_sdk >= v1.0.2: please follow setup instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v1.0.x)
+* wrp_sdk >= **v1.2.1**: please follow setup instructions from [here](https://github.com/westonrobot/wrp_sdk/tree/sample-v1.0.x)
 
 ### Build the package
 
