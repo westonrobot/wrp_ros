@@ -8,7 +8,6 @@
  * @copyright Copyright (c) 2024 Weston Robot Pte. Ltd.
  */
 #include "wrp_ros/peripheral/lift_controller_node.hpp"
-
 namespace westonrobot {
 LiftControllerNode::LiftControllerNode()
     : lift_controller_(),
@@ -29,7 +28,7 @@ LiftControllerNode::LiftControllerNode()
   }
 
   lift_status_pub_ =
-      nh_.advertise<wrp_ros::LiftStatus>("/lift_controller/lift_status", 10);
+      nh_.advertise<wrp_ros::LiftStatus>("/lift_controller/lift_status_", 10);
 
   query_server_ = nh_.advertiseService(
       "/lift_controller/query_state", &LiftControllerNode::QueryCallback, this);
@@ -49,14 +48,18 @@ void LiftControllerNode::LiftControllerCallback(
   wrp_ros::LiftControlFeedback feedback;
   wrp_ros::LiftControlResult result;
 
-  if (goal->position == 0) {
-    lift_controller_.ResetState(goal->id);
-  } else {
-    lift_controller_.SendCommandToLift(goal->position, goal->speed, goal->id);
+  if (goal->id != lift_status_.LIFT_HORIZONTAL &&
+      goal->id != lift_status_.LIFT_VERTICAL) {
+    ROS_ERROR("Invalid id. Valid id are 0 (horizontal) and 1 (vertical)");
+    result.id = goal->id;
+    lift_control_server_.setAborted(result, "Invalid id");
+    return;
   }
 
+  lift_controller_.SendCommandToLift(goal->position, goal->speed, goal->id);
+
   LiftState state;
-  static uint8_t prevPos = state.position;  // To reduce redundant updates
+  static uint8_t prevPos = state.position;
   do {
     state = lift_controller_.GetLiftState(goal->id);
     if (state.position != prevPos) {
@@ -78,6 +81,12 @@ void LiftControllerNode::LiftControllerCallback(
 
 bool LiftControllerNode::QueryCallback(wrp_ros::LiftQuery::Request& req,
                                        wrp_ros::LiftQuery::Response& res) {
+  if (req.id != lift_status_.LIFT_HORIZONTAL &&
+      req.id != lift_status_.LIFT_VERTICAL) {
+    ROS_ERROR("Invalid id. Valid id are 0 (horizontal) and 1 (vertical)");
+    return false;
+  }
+
   LiftState state = lift_controller_.GetLiftState(req.id);
   res.position = state.position;
   res.speed = state.speed;
@@ -86,16 +95,14 @@ bool LiftControllerNode::QueryCallback(wrp_ros::LiftQuery::Request& req,
 
 void LiftControllerNode::PublishLiftState() {
   signal(SIGINT, LiftControllerNode::ExitSignalHandler);
-  wrp_ros::LiftStatus lift_status_msg;
-
   while (ros::ok) {
-    for (uint8_t orientation = lift_status_msg.LIFT_HORIZONTAL;
-         orientation <= lift_status_msg.LIFT_VERTICAL; ++orientation) {
-      LiftState lift_state = lift_controller_.GetLiftState(orientation);
+    for (uint8_t id = lift_status_.LIFT_HORIZONTAL;
+         id <= lift_status_.LIFT_VERTICAL; ++id) {
+      LiftState lift_state = lift_controller_.GetLiftState(id);
 
-      lift_status_msg.orientation = orientation;
-      lift_status_msg.position = lift_state.position;
-      lift_status_pub_.publish(lift_status_msg);
+      lift_status_.id = id;
+      lift_status_.position = lift_state.position;
+      lift_status_pub_.publish(lift_status_);
     }
     ros::spinOnce();
     ros::Rate(10).sleep();
