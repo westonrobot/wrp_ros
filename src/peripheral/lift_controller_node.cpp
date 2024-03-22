@@ -28,7 +28,7 @@ LiftControllerNode::LiftControllerNode()
   }
 
   lift_status_pub_ =
-      nh_.advertise<wrp_ros::LiftStatus>("/lift_controller/lift_status_", 10);
+      nh_.advertise<wrp_ros::LiftStatus>("/lift_controller/lift_status", 10);
 
   query_server_ = nh_.advertiseService(
       "/lift_controller/query_state", &LiftControllerNode::QueryCallback, this);
