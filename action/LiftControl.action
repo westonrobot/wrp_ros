@@ -1,0 +1,16 @@
+# LIFT_HORIZONTAL: 0
+# LIFT_VERTICAL: 1
+#Goal 
+uint8 id
+uint8 position
+int8 speed
+---
+#Result 
+uint8 id
+uint8 position
+int8 speed
+---
+#Feedback
+uint8 id
+uint8 position
+int8 speed

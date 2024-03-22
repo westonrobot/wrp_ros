@@ -18,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf2
   tf2_ros
+  actionlib
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -54,6 +56,7 @@ add_message_files(
     ActuatorState.msg
     ActuatorStateArray.msg
     DriverState.msg
+    LiftStatus.msg
     LightControlType.msg
     MotionCommand.msg
     MotionState.msg
@@ -70,22 +73,23 @@ add_message_files(
 add_service_files(
   FILES
   AccessControl.srv
-  LightControl.srv
   AssistedModeControl.srv
+  LiftQuery.srv
+  LightControl.srv
   MotionReset.srv
   PowerRegulatorControl.srv
 )
 
-## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+# Generate actions in the 'action' folder
+add_action_files(
+  FILES
+  LiftControl.action
+)
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
+  actionlib_msgs
   std_msgs
   geometry_msgs
 )
@@ -119,8 +123,8 @@ catkin_package(CATKIN_DEPENDS std_msgs message_runtime)
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES wrp_ros
- CATKIN_DEPENDS message_generation roscpp sensor_msgs std_msgs
- DEPENDS wrp_sdk
+ CATKIN_DEPENDS message_generation roscpp sensor_msgs std_msgs actionlib actionlib_msgs
+ DEPENDS wrp_sdk 
 )
 
 ###########
@@ -138,6 +142,11 @@ add_dependencies(wrp_sdk_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORT
 
 add_executable(mobile_base_node src/mobile_base/mobile_base_node.cpp)
 target_link_libraries(mobile_base_node wrp_sdk_ros ${catkin_LIBRARIES})
+
+add_executable(lift_controller_node src/peripheral/lift_controller_node.cpp)
+target_link_libraries(lift_controller_node westonrobot::wrp_sdk ${catkin_LIBRARIES})
+add_dependencies(lift_controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 # peripheral device support
 if(BUILD_PERIPH_MODULE)
