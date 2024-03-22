@@ -61,7 +61,7 @@ ROS wrappers around wrp_sdk peripheral drivers.
 
 | Published Topic                | Type                | Description                                |
 | ------------------------------ | ------------------- | ------------------------------------------ |
-| `/lift_controller/lift_status` | wrp_ros::LiftStatus | Outputs the lift orientation and position. |
+| `/lift_controller/lift_status` | wrp_ros::LiftStatus | Outputs the lift id and position. |
 
 | Action                  | Type                       | Description                  |
 | ----------------------- | -------------------------- | ---------------------------- |

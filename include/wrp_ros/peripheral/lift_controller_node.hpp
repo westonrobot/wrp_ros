@@ -35,6 +35,7 @@ class LiftControllerNode {
   ros::ServiceServer query_server_;
   actionlib::SimpleActionServer<wrp_ros::LiftControlAction> lift_control_server_;
 
+  wrp_ros::LiftStatus lift_status_;
   LiftController lift_controller_;
 
   void PublishLiftState(void);
