@@ -1,3 +1,5 @@
+# LIFT_HORIZONTAL: 0
+# LIFT_VERTICAL: 1
 #Goal 
 uint8 id
 uint8 position

@@ -7,7 +7,6 @@
  *
  * @copyright Copyright (c) 2024 Weston Robot Pte. Ltd.
  */
-
 #ifndef LIFT_CONTROLLER_NODE
 #define LIFT_CONTROLLER_NODE
 
@@ -20,7 +19,6 @@
 #include <wrp_ros/LiftStatus.h>
 #include <wrp_ros/LiftControlAction.h>
 #include "wrp_sdk/peripheral/lift_controller.hpp"
-#include "wrp_sdk/interface/lift_interface.hpp"
 
 namespace westonrobot {
 class LiftControllerNode {
@@ -37,7 +35,7 @@ class LiftControllerNode {
   ros::ServiceServer query_server_;
   actionlib::SimpleActionServer<wrp_ros::LiftControlAction> lift_control_server_;
 
-  westonrobot::LiftController lift_controller_;
+  LiftController lift_controller_;
 
   void PublishLiftState(void);
   static void ExitSignalHandler(int sig);

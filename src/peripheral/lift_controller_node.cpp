@@ -49,12 +49,8 @@ void LiftControllerNode::LiftControllerCallback(
   wrp_ros::LiftControlFeedback feedback;
   wrp_ros::LiftControlResult result;
 
-  if (goal->position == 0) {
-    lift_controller_.ResetState(goal->id);
-  } else {
-    lift_controller_.SendCommandToLift(goal->position, goal->speed, goal->id);
-  }
-
+  lift_controller_.SendCommandToLift(goal->position, goal->speed, goal->id);
+  
   LiftState state;
   static uint8_t prevPos = state.position;  // To reduce redundant updates
   do {
