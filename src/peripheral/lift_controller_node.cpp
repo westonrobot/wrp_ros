@@ -57,7 +57,7 @@ void LiftControllerNode::LiftControllerCallback(
   }
 
   lift_controller_.SendCommandToLift(goal->position, goal->speed, goal->id);
-
+  
   LiftState state;
   static uint8_t prevPos = state.position;
   do {
