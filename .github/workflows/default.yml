@@ -49,7 +49,6 @@ jobs:
           echo \
               "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/weston-robot.gpg] http://deb.westonrobot.net/$(lsb_release -cs) $(lsb_release -cs) main" | \
               sudo tee /etc/apt/sources.list.d/weston-robot.list > /dev/null
-          sudo apt-get update
           apt-get update && apt-get -y install wrp-sdk
       - name: Install latest lely-can
         run: |
