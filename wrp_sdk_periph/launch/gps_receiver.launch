@@ -1,0 +1,4 @@
+<launch>
+    <rosparam file="$(find wrp_sdk_periph)/config/peripheral/gps_receiver_node_config.yaml" />
+    <node pkg="wrp_sdk_periph" name="gps_receiver_node" type="gps_receiver_node" output="screen"/>
+</launch>

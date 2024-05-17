@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir -p ${GITHUB_WORKSPACE}/catkin_ws/src
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           submodules: recursive
           path: "catkin_ws/src/"
