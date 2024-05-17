@@ -22,7 +22,6 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses:  westonrobot-dev/action-cleanup@master
       - name: Upgrade git if on Ubuntu 18.04
         if: |
           contains(matrix.container, 'bionic') || contains(matrix.container, 'zephyr') || contains(matrix.container, 'melodic')
@@ -34,7 +33,7 @@ jobs:
         run: |
           mkdir -p ${GITHUB_WORKSPACE}/catkin_ws/src
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           path: "catkin_ws/src/"
