@@ -36,26 +36,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ssh-key: ${{ secrets.GIT_REPO_SSH_KEY }}
           submodules: recursive
           path: "catkin_ws/src/"
-      - name: Install latest wrp_sdk
+      - name: Install boost
         run: |
-          echo "deb https://westonrobot.jfrog.io/artifactory/wrtoolbox-release $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/weston-robot.list
-          echo "deb https://westonrobot.jfrog.io/artifactory/wrtoolbox-release $(lsb_release -cs) next" >> /etc/apt/sources.list.d/weston-robot.list
-          curl -sSL 'https://westonrobot.jfrog.io/artifactory/api/security/keypair/wr-deb/public' | apt-key add -
-          apt-get update && apt-get -y install wrp_sdk
+          apt-get update && apt-get -y install libboost-all-dev
+      - name: Install latest stable wrp_sdk
+        run: |
+          sudo apt-get update
+          sudo install -m 0755 -d /etc/apt/keyrings
+          curl -fsSL http://deb.westonrobot.net/signing.key | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/weston-robot.gpg
+          sudo chmod a+r /etc/apt/keyrings/weston-robot.gpg
+          echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/weston-robot.gpg] http://deb.westonrobot.net/$(lsb_release -cs) $(lsb_release -cs) main" | \
+              sudo tee /etc/apt/sources.list.d/weston-robot.list > /dev/null
+          sudo apt-get update
+          apt-get update && apt-get -y install wrp-sdk
       - name: Install latest lely-can
         run: |
           add-apt-repository ppa:lely/ppa
           apt-get update && apt-get -y install pkg-config liblely-coapp-dev liblely-co-tools
-      - name: Install ROS dependencies
-        run: |
-          cd ${GITHUB_WORKSPACE}/catkin_ws
-          source /opt/ros/${ROS_DISTRO}/setup.bash
-          rosdep update
-          rosdep install -y --ignore-src --from-paths src --rosdistro ${ROS_DISTRO} --skip-keys wrp_sdk --skip-keys wrp_zbus
-          apt-get update && apt-get install -y ros-${ROS_DISTRO}-message-generation ros-${ROS_DISTRO}-tf2*
+          - name: Install ROS dependencies
+          run: |
+            apt-get install -y python3-rosdep
+            if [ ! -e /etc/ros/rosdep/sources.list.d/20-default.list ]; then rosdep init; fi
+            cd ${GITHUB_WORKSPACE}/catkin_ws
+            source /opt/ros/${ROS_DISTRO}/setup.bash
+            rosdep update
+            rosdep install -y -r --ignore-src --from-paths src --rosdistro ${ROS_DISTRO}
       - name: Catkin make
         run: |
           cd ${GITHUB_WORKSPACE}/catkin_ws
