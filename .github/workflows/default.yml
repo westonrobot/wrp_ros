@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         container: ["westonrobot/ros:melodic-ci", "westonrobot/ros:noetic-ci"]
-        runner: [[self-hosted, Linux, X64], [self-hosted, Linux, ARM64]]
+        runner: ["ubuntu-latest"]
     runs-on: ${{ matrix.runner}}
     container:
       image: ${{ matrix.container }}
