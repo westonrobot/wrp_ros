@@ -1,8 +1,8 @@
 /**
  * @file mobile_base_ros.cpp
- * @brief 
+ * @brief
  * @date 17-05-2024
- * 
+ *
  * @copyright Copyright (c) 2024 Weston Robot Pte. Ltd.
  */
 #include "wrp_sdk_robot/mobile_base_node.hpp"
@@ -11,10 +11,6 @@
 
 #include "wrp_sdk/mobile_base/westonrobot/mobile_base.hpp"
 #include "wrp_sdk/mobile_base/agilex/agilex_base_v2_adapter.hpp"
-
-#ifdef WITH_UNITREE_SUPPORT
-#include "unitree_a1_adapter/a1_legged_base.hpp"
-#endif
 
 #include <tf/transform_broadcaster.h>
 
@@ -30,13 +26,15 @@ MobileBaseNode::MobileBaseNode(ros::NodeHandle* nh) : nh_(nh) {
     ros::shutdown();
   }
 
-  if (!MobileBaseNode::SetupRobot()) {
+  if (!MobileBaseNode::SetupHardware()) {
     ROS_ERROR("Failed to setup robot");
     ros::shutdown();
   }
 
-  SetupSubscription();
-  SetupService();
+  if (!MobileBaseNode::SetupInterfaces()) {
+    ROS_ERROR("Failed to setup ROS interfaces");
+    ros::shutdown();
+  }
 }
 
 bool MobileBaseNode::ReadParameters() {
@@ -46,21 +44,22 @@ bool MobileBaseNode::ReadParameters() {
   nh_->getParam("odom_frame", odom_frame_);
   nh_->getParam("auto_reconnect", auto_reconnect_);
   nh_->getParam("motion_type", motion_type_);
+  nh_->getParam("publish_odom_tf", publish_odom_tf_);
 
-  ROS_INFO(
-      "Successfully loaded the following parameters: \n"
-      "can_device: %s\n"
-      "robot_type: %s\n"
-      "motion_type: %s\n"
-      "base_frame: %s\n"
-      "odom_frame: %s\n"
-      "auto_reconnect: %d\n",
-      can_device_.c_str(), robot_type_.c_str(), motion_type_.c_str(),
-      base_frame_.c_str(), odom_frame_.c_str(), auto_reconnect_);
+  ROS_INFO_STREAM("--- Parameters loaded are ---");
+  ROS_INFO_STREAM("can_device: " << can_device_);
+  ROS_INFO_STREAM("robot_type: " << robot_type_);
+  ROS_INFO_STREAM("base_frame: " << base_frame_);
+  ROS_INFO_STREAM("odom_frame: " << odom_frame_);
+  ROS_INFO_STREAM("auto_reconnect: " << auto_reconnect_);
+  ROS_INFO_STREAM("motion_type: " << motion_type_);
+  ROS_INFO_STREAM("publish_odom_tf: " << publish_odom_tf_);
+  ROS_INFO_STREAM("-----------------------------");
+
   return true;
 }
 
-bool MobileBaseNode::SetupRobot() {
+bool MobileBaseNode::SetupHardware() {
   // create appropriate adapter
   if (robot_type_ == "weston") {
     robot_ = std::make_shared<MobileBase>();
@@ -68,16 +67,10 @@ bool MobileBaseNode::SetupRobot() {
     robot_ = std::make_shared<AgilexBaseV2Adapter>();
   } else if (robot_type_ == "vbot") {
     robot_ = std::make_shared<MobileBase>(true);
-  }
-#ifdef WITH_UNITREE_SUPPORT
-  else if (robot_type_ == "unitree_a1"): {
-    robot_ = std::make_shared<A1LeggedBase>();
-  }
-#endif
-  else {
+  } else {
     ROS_ERROR(
         "Unknown robot base type\n Supported are \"weston\", "
-        "\"agilex\", \"unitree_a1\" & \"vbot\"");
+        "\"agilex\" & \"vbot\"");
     return false;
   }
 
@@ -91,32 +84,33 @@ bool MobileBaseNode::SetupRobot() {
   return true;
 }
 
-void MobileBaseNode::SetupSubscription() {
+bool MobileBaseNode::SetupInterfaces() {
   // publishers
   system_state_publisher_ =
-      nh_->advertise<wrp_sdk_msgs::SystemState>("/system_state", 10);
+      nh_->advertise<wrp_sdk_msgs::SystemState>("system_state", 10);
   motion_state_publisher_ =
-      nh_->advertise<wrp_sdk_msgs::MotionState>("/motion_state", 10);
+      nh_->advertise<wrp_sdk_msgs::MotionState>("motion_state", 10);
   actuator_state_publisher_ =
-      nh_->advertise<wrp_sdk_msgs::ActuatorStateArray>("/actuator_state", 10);
-  odom_publisher_ = nh_->advertise<nav_msgs::Odometry>("/odom", 50);
+      nh_->advertise<wrp_sdk_msgs::ActuatorStateArray>("actuator_state", 10);
+  odom_publisher_ = nh_->advertise<nav_msgs::Odometry>("odom", 50);
   battery_state_publisher_ =
-      nh_->advertise<sensor_msgs::BatteryState>("/battery_state", 10);
+      nh_->advertise<sensor_msgs::BatteryState>("battery_state", 10);
 
   // subscribers
   motion_cmd_subscriber_ = nh_->subscribe<geometry_msgs::Twist>(
-      "/cmd_vel", 5, &MobileBaseNode::MotionCmdCallback, this);
-}
+      "cmd_vel", 5, &MobileBaseNode::MotionCmdCallback, this);
 
-void MobileBaseNode::SetupService() {
   access_control_service_ = nh_->advertiseService(
       "access_control", &MobileBaseNode::HandleAccessControl, this);
-  assisted_mode_control_service_ = nh_->advertiseService(
-      "assisted_mode_control", &MobileBaseNode::HandleAssistedModeControl, this);
+  assisted_mode_control_service_ =
+      nh_->advertiseService("assisted_mode_control",
+                            &MobileBaseNode::HandleAssistedModeControl, this);
   light_control_service_ = nh_->advertiseService(
       "light_control", &MobileBaseNode::HandleLightControl, this);
   motion_reset_service_ = nh_->advertiseService(
       "motion_reset", &MobileBaseNode::HandleMotionReset, this);
+
+  return true;
 }
 
 void MobileBaseNode::PublishRobotState() {
@@ -218,7 +212,9 @@ void MobileBaseNode::PublishWheelOdometry() {
   tf_msg.transform.translation.z = 0.0;
   tf_msg.transform.rotation = odom_msg.pose.pose.orientation;
 
-  tf_broadcaster_.sendTransform(tf_msg);
+  if (publish_odom_tf_) {
+    tf_broadcaster_.sendTransform(tf_msg);
+  }
   odom_publisher_.publish(odom_msg);
 }
 
@@ -278,14 +274,15 @@ void MobileBaseNode::MotionCmdCallback(
   //   ROS_INFO("CMD received:%f, %f", msg->linear.x, msg->angular.z);
 }
 
-bool MobileBaseNode::HandleAccessControl(wrp_sdk_msgs::AccessControl::Request& req,
-                                        wrp_sdk_msgs::AccessControl::Response& res) {
+bool MobileBaseNode::HandleAccessControl(
+    wrp_sdk_msgs::AccessControl::Request& req,
+    wrp_sdk_msgs::AccessControl::Response& res) {
   if (req.action_type ==
       wrp_sdk_msgs::AccessControl::Request::ACTION_TYPE_REQUEST_CONTROL) {
     auto result = robot_->RequestControl();
     res.result_code = static_cast<uint32_t>(result);
-  } else if (req.action_type ==
-             wrp_sdk_msgs::AccessControl::Request::ACTION_TYPE_RENOUNCE_CONTROL) {
+  } else if (req.action_type == wrp_sdk_msgs::AccessControl::Request::
+                                    ACTION_TYPE_RENOUNCE_CONTROL) {
     auto result = robot_->RenounceControl();
     res.result_code = static_cast<uint32_t>(result);
   }
@@ -302,8 +299,9 @@ bool MobileBaseNode::HandleAssistedModeControl(
   return true;
 }
 
-bool MobileBaseNode::HandleLightControl(wrp_sdk_msgs::LightControl::Request& req,
-                                       wrp_sdk_msgs::LightControl::Response& res) {
+bool MobileBaseNode::HandleLightControl(
+    wrp_sdk_msgs::LightControl::Request& req,
+    wrp_sdk_msgs::LightControl::Response& res) {
   LightCommand cmd;
 
   cmd.id = req.id;
@@ -319,15 +317,17 @@ bool MobileBaseNode::HandleLightControl(wrp_sdk_msgs::LightControl::Request& req
   return true;
 }
 
-bool MobileBaseNode::HandleMotionReset(wrp_sdk_msgs::MotionReset::Request& req,
-                                      wrp_sdk_msgs::MotionReset::Response& res) {
+bool MobileBaseNode::HandleMotionReset(
+    wrp_sdk_msgs::MotionReset::Request& req,
+    wrp_sdk_msgs::MotionReset::Response& res) {
   MotionResetCommand cmd;
 
   cmd.type = static_cast<MotionResetCommandType>(req.type);
 
   if (robot_->SdkHasControlToken()) {
     robot_->SetMotionResetCommand(cmd);
-    res.result_code = wrp_sdk_msgs::MotionReset::Response::MOTION_RESET_SUCCCESS;
+    res.result_code =
+        wrp_sdk_msgs::MotionReset::Response::MOTION_RESET_SUCCCESS;
   } else {
     res.result_code = wrp_sdk_msgs::MotionReset::Response::MOTION_RESET_FAILURE;
   }
@@ -359,7 +359,7 @@ void MobileBaseNode::Run(double loop_hz) {
 }
 }  // namespace westonrobot
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   // setup ROS node
   ros::init(argc, argv, "mobile_base_node");
   ros::NodeHandle node("~");
