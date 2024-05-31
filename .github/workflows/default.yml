@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        container: ["westonrobot/ros:melodic-ci", "westonrobot/ros:noetic-ci"]
+        container: ["westonrobot/ros:noetic-ci"]
         runner: ["ubuntu-latest"]
     runs-on: ${{ matrix.runner}}
     container:
