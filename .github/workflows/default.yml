@@ -66,4 +66,8 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/catkin_ws
           source /opt/ros/${ROS_DISTRO}/setup.bash && catkin_make
-          
+      - name: Catkin make isolated
+        run: |
+          cd ${GITHUB_WORKSPACE}/catkin_ws
+          rm -r devel/ build/
+          source /opt/ros/${ROS_DISTRO}/setup.bash && catkin_make_isolated

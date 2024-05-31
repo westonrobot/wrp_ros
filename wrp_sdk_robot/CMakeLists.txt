@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   wrp_sdk_msgs
 )
 
+list(APPEND CMAKE_PREFIX_PATH "/opt/weston_robot/lib/cmake")
 find_package(wrp_sdk 1.3 REQUIRED)
 
 # ##################################

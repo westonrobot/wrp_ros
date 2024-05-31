@@ -4,6 +4,7 @@ project(wrp_sdk_periph)
 # # Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LelyIO QUIET IMPORTED_TARGET liblely-io2)
 pkg_check_modules(LelyCOAPP QUIET IMPORTED_TARGET liblely-coapp)
@@ -11,24 +12,25 @@ pkg_check_modules(LelyCOAPP QUIET IMPORTED_TARGET liblely-coapp)
 set(BUILD_CANOPEN_SUPPORT OFF)
 
 if(LelyIO_FOUND AND LelyCOAPP_FOUND)
-  message(STATUS "Lely-core libraries found, peripheral module will be included")
-  set(BUILD_CANOPEN_SUPPORT ON)
+message(STATUS "Lely-core libraries found, peripheral module will be included")
+set(BUILD_CANOPEN_SUPPORT ON)
 else()
-  message(WARNING "CANopen-related dependencies are not found, ROS nodes for peripherals will not be built. Run the following commands to install the missing libraries:
-    $ sudo apt-get install -y software-properties-common 
-    $ sudo add-apt-repository ppa:lely/ppa && sudo apt-get update
-    $ sudo apt-get install -y pkg-config liblely-coapp-dev liblely-co-tools")
+message(WARNING "CANopen-related dependencies are not found, ROS nodes for peripherals will not be built. Run the following commands to install the missing libraries:
+$ sudo apt-get install -y software-properties-common 
+$ sudo add-apt-repository ppa:lely/ppa && sudo apt-get update
+$ sudo apt-get install -y pkg-config liblely-coapp-dev liblely-co-tools")
 endif()
 
 # # Find catkin macros and libraries
 # # if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 # # is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  wrp_sdk_msgs
-  actionlib
+roscpp
+wrp_sdk_msgs
+actionlib
 )
 
+list(APPEND CMAKE_PREFIX_PATH "/opt/weston_robot/lib/cmake")
 find_package(wrp_sdk 1.3 REQUIRED)
 
 # ##################################
