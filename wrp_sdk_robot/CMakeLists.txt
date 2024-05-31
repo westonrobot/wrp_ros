@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
   sensor_msgs
+  tf
   tf2
   tf2_ros
   wrp_sdk_msgs
@@ -26,7 +27,7 @@ find_package(wrp_sdk 1.3 REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp sensor_msgs tf2 tf2_ros wrp_sdk_msgs
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp sensor_msgs tf tf2 tf2_ros wrp_sdk_msgs
   DEPENDS wrp_sdk
 )
 
