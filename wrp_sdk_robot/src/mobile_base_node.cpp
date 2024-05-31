@@ -335,8 +335,6 @@ bool MobileBaseNode::HandleMotionReset(
   return true;
 }
 
-void MobileBaseNode::SetAutoReconnect(bool enable) { auto_reconnect_ = enable; }
-
 void MobileBaseNode::Run(double loop_hz) {
   loop_period_ = 1.0 / loop_hz;
   ros::Rate rate(loop_hz);

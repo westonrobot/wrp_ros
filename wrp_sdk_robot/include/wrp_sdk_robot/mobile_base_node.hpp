@@ -32,8 +32,6 @@ class MobileBaseNode {
   MobileBaseNode(ros::NodeHandle* nh);
   ~MobileBaseNode() = default;
 
-  void SetAutoReconnect(bool enable);
-
   void Run(double loop_hz);
 
  private:
