@@ -7,7 +7,7 @@
  * Copyright (c) 2021 Weston Robot Pte. Ltd.
  */
 
-#include "wrp_sdk_periph/peripheral/gps_receiver_node.hpp"
+#include "wrp_sdk_periph/gps_receiver_node.hpp"
 
 #include "wrp_sdk/peripheral/gps_receiver_nmea.hpp"
 

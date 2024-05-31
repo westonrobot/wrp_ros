@@ -40,7 +40,7 @@ find_package(wrp_sdk 1.3 REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp wrp_sdk_msgs actionlib
+  CATKIN_DEPENDS roscpp actionlib wrp_sdk_msgs
   DEPENDS wrp_sdk
 )
 

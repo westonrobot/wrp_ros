@@ -7,7 +7,7 @@
  * Copyright (c) 2021 Weston Robot Pte. Ltd.
  */
 
-#include "wrp_sdk_periph/peripheral/power_regulator_node.hpp"
+#include "wrp_sdk_periph/power_regulator_node.hpp"
 
 #include "wrp_sdk/peripheral/power_regulator_v2.hpp"
 
@@ -25,7 +25,7 @@ PowerRegulatorNode::PowerRegulatorNode() {
     ros::shutdown();
   }
 
-  state_pub_ = nh_.advertise<wrp_sdk_periph::PowerRegulatorDeviceState>(
+  state_pub_ = nh_.advertise<wrp_sdk_msgs::PowerRegulatorDeviceState>(
       "/power_regulator/state", 5);
 
   cmd_service_ = nh_.advertiseService("/power_regulator/cmd",
@@ -38,21 +38,21 @@ PowerRegulatorNode::PowerRegulatorNode() {
 PowerRegulatorNode::~PowerRegulatorNode() { ros::shutdown(); }
 
 bool PowerRegulatorNode::HandleCommand(
-    wrp_sdk_periph::PowerRegulatorControl::Request& req,
-    wrp_sdk_periph::PowerRegulatorControl::Response& res) {
+    wrp_sdk_msgs::PowerRegulatorControl::Request& req,
+    wrp_sdk_msgs::PowerRegulatorControl::Response& res) {
   ROS_INFO("Power regulator channel: %d, %d", req.channel, req.enable);
 
   PowerRegulatorInterface::OutputChannel chn;
-  if (req.channel == wrp_sdk_periph::PowerRegulatorControl::Request::CHANNEL_19V) {
+  if (req.channel == wrp_sdk_msgs::PowerRegulatorControl::Request::CHANNEL_19V) {
     chn = PowerRegulatorV2::kChannel19V;
   } else if (req.channel ==
-             wrp_sdk_periph::PowerRegulatorControl::Request::CHANNEL_12V) {
+             wrp_sdk_msgs::PowerRegulatorControl::Request::CHANNEL_12V) {
     chn = PowerRegulatorV2::kChannel12V;
   } else if (req.channel ==
-             wrp_sdk_periph::PowerRegulatorControl::Request::CHANNEL_5VI) {
+             wrp_sdk_msgs::PowerRegulatorControl::Request::CHANNEL_5VI) {
     chn = PowerRegulatorV2::kChannel5Vi;
   } else if (req.channel ==
-             wrp_sdk_periph::PowerRegulatorControl::Request::CHANNEL_12VI) {
+             wrp_sdk_msgs::PowerRegulatorControl::Request::CHANNEL_12VI) {
     chn = PowerRegulatorV2::kChannel12Vi;
   } else {
     res.state = false;
@@ -68,7 +68,7 @@ void PowerRegulatorNode::PublishCallback(
     const PowerRegulatorInterface::DeviceState& data) {
   //   ROS_INFO("regulator msg received");
 
-  wrp_sdk_periph::PowerRegulatorDeviceState state_msg;
+  wrp_sdk_msgs::PowerRegulatorDeviceState state_msg;
 
   state_msg.input_voltage = data.input_voltage;
   state_msg.fan_speed = data.fan_speed;
