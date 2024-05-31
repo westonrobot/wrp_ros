@@ -4,7 +4,7 @@
         * robot_type: weston/agilex
         * motion_type: skid_steer/omni/differential
     -->
-    <arg name="can_device" default="can0" />
+    <arg name="can_device" default="vcan0" />
     <arg name="robot_type" default="weston" />
     <arg name="motion_type" default="skid_steer" />
     <arg name="base_frame" default="base_link" />

@@ -23,6 +23,7 @@
 #include "wrp_sdk_msgs/AssistedModeControl.h"
 #include "wrp_sdk_msgs/LightControl.h"
 #include "wrp_sdk_msgs/MotionReset.h"
+#include "wrp_sdk_msgs/RcState.h"
 
 #include "wrp_sdk/interface/mobile_robot_interface.hpp"
 
@@ -35,37 +36,56 @@ class MobileBaseNode {
   void Run(double loop_hz);
 
  private:
+  enum class RobotVariant {
+    // AglieX
+    kAgilexScoutV2 = 0,
+    kAgilexScoutMini,
+    kAgilexScoutMiniOmni,
+    kAgilexRanger,
+    kAgilexRangerMiniV1,
+    kAgilexRangerMiniV2,
+    kAgilexTracer,
+    kAgilexTracerMini,
+    kAgilexHunter,
+    kAgilexHunterSE,
+    kAgilexBunker,
+
+    // WestonRobot
+    kWRScout,
+    kWRVBot,
+
+    // BangBang
+    kBangBangRobooterX,
+
+    kNumOfVariants
+  };
   // ----- ROS Node Parameters -----
-  bool auto_reconnect_ = true;
-  std::string can_device_ = "can0";
-  std::string base_frame_ = "base_link";
-  std::string robot_type_ = "weston";
-  std::string odom_frame_ = "odom";
-  std::string motion_type_ = "skid_steer";
-  bool publish_odom_tf_ = true;
+  int robot_type_ = 0;                   /**< Robot Type/Variant*/
+  std::string can_device_ = "can0";      /**< CAN device to use*/
+  std::string base_frame_ = "base_link"; /**< Robot base frame name*/
+  std::string odom_frame_ = "odom";      /**< Odometry frame name*/
+  bool publish_odom_tf_ = true; /**< If publish odom_frame->base_frame tf*/
+  bool auto_reconnect_ = true;  /**< If auto request for control*/
   // ----- Internal Variables -----
+  double loop_period_;
   ros::NodeHandle* nh_;
+  RobotVariant robot_variant_;
   std::shared_ptr<MobileRobotInterface> robot_ = nullptr;
-
-  float position_x_ = 0.0;
-  float position_y_ = 0.0;
-  float theta_ = 0.0;
-  ros::Time last_time_ = ros::Time::now();
-  double loop_period_ = 0.02;  // in seconds
-
-  // ----- Published Messages-----
-  // ----- Subscribers & Publishers & Services-----
-  ros::Publisher odom_publisher_;
   tf2_ros::TransformBroadcaster tf_broadcaster_;
+  // ----- Published Messages-----
+  std::mutex odom_mutex_;
+  nav_msgs::Odometry odom_msg_;
+  ros::Time last_odom_time_;
+  // ----- Subscribers & Publishers & Services-----
+  ros::Subscriber motion_cmd_subscriber_;
 
   ros::Publisher system_state_publisher_;
   ros::Publisher motion_state_publisher_;
   ros::Publisher actuator_state_publisher_;
   ros::Publisher battery_state_publisher_;
-  ros::Publisher ultrasonic_data_publisher_;
-  ros::Publisher tof_data_publisher_;
-  ros::Subscriber motion_cmd_subscriber_;
-
+  ros::Publisher rc_state_publisher_;
+  ros::Publisher odom_publisher_;
+  
   ros::ServiceServer access_control_service_;
   ros::ServiceServer light_control_service_;
   ros::ServiceServer assisted_mode_control_service_;
@@ -74,14 +94,14 @@ class MobileBaseNode {
   // ----- Callbacks -----
   void MotionCmdCallback(const geometry_msgs::Twist::ConstPtr& msg);
 
-  bool HandleAccessControl(wrp_sdk_msgs::AccessControl::Request& req,
+  bool AccessControlCallback(wrp_sdk_msgs::AccessControl::Request& req,
                            wrp_sdk_msgs::AccessControl::Response& res);
-  bool HandleAssistedModeControl(
+  bool AssistedModeControlCallback(
       wrp_sdk_msgs::AssistedModeControl::Request& req,
       wrp_sdk_msgs::AssistedModeControl::Response& res);
-  bool HandleLightControl(wrp_sdk_msgs::LightControl::Request& req,
+  bool LightControlCallback(wrp_sdk_msgs::LightControl::Request& req,
                           wrp_sdk_msgs::LightControl::Response& res);
-  bool HandleMotionReset(wrp_sdk_msgs::MotionReset::Request& req,
+  bool MotionResetCallback(wrp_sdk_msgs::MotionReset::Request& req,
                          wrp_sdk_msgs::MotionReset::Response& res);
 
   bool ReadParameters();
@@ -89,10 +109,12 @@ class MobileBaseNode {
   bool SetupHardware();
   bool SetupInterfaces();
 
-  void PublishRobotState();
-  void PublishSensorData();
-  void PublishWheelOdometry();
-  nav_msgs::Odometry CalculateOdometry(geometry_msgs::Twist robot_twist);
+  void PublishSystemState();
+  void PublishBatteryState();
+  void PublishActuatorState();
+  void PublishRcState();
+  void PublishOdometry();
+  void UpdateOdometry(geometry_msgs::Twist twist);
 };
 
 }  // namespace westonrobot

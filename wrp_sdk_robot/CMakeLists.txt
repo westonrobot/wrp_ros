@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf2
   tf2_ros
+  tf2_geometry_msgs
   wrp_sdk_msgs
 )
 
