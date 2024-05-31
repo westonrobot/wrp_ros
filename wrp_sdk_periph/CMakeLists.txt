@@ -4,9 +4,6 @@ project(wrp_sdk_periph)
 # # Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
-string(REPLACE ":" ";" CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
-list(APPEND CMAKE_PREFIX_PATH "/opt/weston_robot/lib/cmake")
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LelyIO QUIET IMPORTED_TARGET liblely-io2)
 pkg_check_modules(LelyCOAPP QUIET IMPORTED_TARGET liblely-coapp)
