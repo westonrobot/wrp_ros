@@ -1,24 +1,17 @@
 <launch>
-    <!-- 
-        Supported robot types:         
-        * robot_type: weston/agilex
-        * motion_type: skid_steer/omni/differential
-    -->
+    <arg name="robot_type" default="6" />
     <arg name="can_device" default="can0" />
-    <arg name="robot_type" default="agilex" />
-    <arg name="motion_type" default="differential" />
     <arg name="base_frame" default="base_link" />
     <arg name="odom_frame" default="odom" />
-    <arg name="odom_topic_name" default="odom" />
+    <arg name="publish_odom_tf" default="true" />
     <arg name="auto_reconnect" default="true" />
 
     <node name="mobile_base_node" pkg="wrp_sdk_robot" type="mobile_base_node" output="screen">
-        <param name="can_device" type="string" value="$(arg can_device)" />
         <param name="robot_type" type="string" value="$(arg robot_type)" />
-        <param name="motion_type" type="string" value="$(arg motion_type)" />
+        <param name="can_device" type="string" value="$(arg can_device)" />
         <param name="base_frame" type="string" value="$(arg base_frame)" />
         <param name="odom_frame" type="string" value="$(arg odom_frame)" />
+        <param name="publish_odom_tf" type="string" value="$(arg publish_odom_tf)" />
         <param name="auto_reconnect" type="bool" value="$(arg auto_reconnect)" />
-        <remap from="/odom" to="$(arg odom_topic_name)" />
     </node>
 </launch>
