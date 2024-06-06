@@ -1,0 +1,4 @@
+<launch>
+    <rosparam file="$(find wrp_sdk_periph)/config/ultrasonic_sensor_node_config.yaml" />
+    <node pkg="wrp_sdk_periph" name="ultrasonic_sensor_node" type="ultrasonic_sensor_node" output="screen"/>
+</launch>
