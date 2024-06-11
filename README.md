@@ -35,6 +35,13 @@ More details can be found in the README inside individual src sub-folders
 
 * wrp_sdk >= **v1.3.0** ... < **v1.5** : please follow setup instructions from [here](https://github.com/westonrobot/wrp_sdk/)
 
+* Peripheral driver dependencies (optional if you are not using peripherals): 
+    ```bash
+    $ sudo apt-get install -y software-properties-common 
+    $ sudo add-apt-repository ppa:lely/ppa
+    $ sudo apt-get install -y pkg-config liblely-coapp-dev liblely-co-tools
+    ```
+
 ### Build the package
 
 * Clone the packages into a catkin workspace and compile/source.  
